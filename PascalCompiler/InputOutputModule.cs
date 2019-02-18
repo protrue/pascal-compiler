@@ -28,19 +28,12 @@ namespace PascalCompiler
 
         public char GetNextCharacter()
         {
-            CurrentLine = InputStream.ReadLine();
-
-            if (CurrentCharacterNumber == CurrentLine.Length)
-            {
-                
-            }
-
-            return 'a';
+            throw new NotImplementedException();
         }
 
         public void InsertError(int line, int column)
         {
-
+            throw new NotImplementedException();
         }
 
         public void Dispose()
