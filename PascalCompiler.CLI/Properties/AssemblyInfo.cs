@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("PascalCompilerApp")]
+[assembly: AssemblyTitle("PascalCompiler.CLI")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("PascalCompilerApp")]
+[assembly: AssemblyProduct("PascalCompiler.CLI")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("c72ca079-3d97-4b81-80d6-f315f817428e")]
+[assembly: Guid("2a1c17f4-33d4-4269-b7c8-dace2529a014")]
 
 // Version information for an assembly consists of the following four values:
 //

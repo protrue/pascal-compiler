@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PascalCompilerApp
+namespace PascalCompiler.CLI
 {
     public class Program
     {
