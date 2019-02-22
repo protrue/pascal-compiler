@@ -8,15 +8,15 @@ using FluentAssertions;
 namespace PascalCompiler.Tests
 {
     [TestClass]
-    public class InputOutputTests
+    public class InputOutputModuleTests
     {
         [TestMethod]
         public void InputOutputModuleGetCharacterTest()
         {
             const string inputFileName = "input.txt";
             const string outputFileName = "output.txt";
-
-            File.WriteAllLines(inputFileName, new[] { "abc1", "qwe2" });
+            var inputText = string.Join(Environment.NewLine, new[] {"ab1", "qwe2", "asdf4"});
+            File.WriteAllText(inputFileName, inputText);
 
             var inputOutputModule = new InputOutputModule(inputFileName, outputFileName);
             var stringBuilder = new StringBuilder();
@@ -26,7 +26,6 @@ namespace PascalCompiler.Tests
 
             inputOutputModule.Dispose();
 
-            var inputText = File.ReadAllText(inputFileName);
             var outputText = File.ReadAllText(outputFileName);
             var readText = stringBuilder.ToString();
 
@@ -36,6 +35,7 @@ namespace PascalCompiler.Tests
                 .BeEquivalentTo(readText);
 
             outputText
+                .Trim()
                 .Should()
                 .BeEquivalentTo(inputText);
         }
