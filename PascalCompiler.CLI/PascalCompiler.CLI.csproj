@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2A1C17F4-33D4-4269-B7C8-DACE2529A014}</ProjectGuid>
+    <ProjectGuid>{65384DDC-578D-4AA4-B018-66A0B23E6432}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>PascalCompiler.CLI</RootNamespace>
-    <AssemblyName>PascalCompiler.CLI</AssemblyName>
+    <RootNamespace>PascalCompiler.Cli</RootNamespace>
+    <AssemblyName>PascalCompiler.Cli</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
