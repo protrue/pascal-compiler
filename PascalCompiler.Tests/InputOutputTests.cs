@@ -13,18 +13,31 @@ namespace PascalCompiler.Tests
         [TestMethod]
         public void InputOutputModuleGetCharacterTest()
         {
-            var inputFileName = "input.txt";
-            var inputOutputModule = new InputOutputModule(inputFileName, "output.txt");
+            const string inputFileName = "input.txt";
+            const string outputFileName = "output.txt";
 
+            File.WriteAllLines(inputFileName, new[] { "abc1", "qwe2" });
+
+            var inputOutputModule = new InputOutputModule(inputFileName, outputFileName);
             var stringBuilder = new StringBuilder();
 
             while (!inputOutputModule.IsEndOfFile)
                 stringBuilder.Append(inputOutputModule.GetNextCharacter());
 
-            var rawText = string.Join(string.Empty, File.ReadAllLines(inputFileName));
+            inputOutputModule.Dispose();
+
+            var inputText = File.ReadAllText(inputFileName);
+            var outputText = File.ReadAllText(outputFileName);
             var readText = stringBuilder.ToString();
 
-            rawText.Should().BeEquivalentTo(readText);
+            inputText
+                .Replace(Environment.NewLine, string.Empty)
+                .Should()
+                .BeEquivalentTo(readText);
+
+            outputText
+                .Should()
+                .BeEquivalentTo(inputText);
         }
     }
 }

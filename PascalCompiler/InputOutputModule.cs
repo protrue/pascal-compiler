@@ -39,6 +39,7 @@ namespace PascalCompiler
                     throw new EndOfStreamException("Невозможно получить следующую литеру: достигнут конец файла");
 
                 CurrentLine = InputStream.ReadLine();
+                OutputStream.WriteLine(CurrentLine);
                 CurrentLineNumber++;
                 CurrentCharacterNumber = -1;
             }
