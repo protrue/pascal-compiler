@@ -18,12 +18,18 @@ namespace PascalCompiler
         public string CurrentLine { get; private set; }
         public char CurrentCharacter { get; private set; }
 
-        public bool IsEndOfFile => InputStream.EndOfStream && CurrentCharacterNumber >= CurrentLine.Length - 1;
+        public List<CompilationError> CompilationErrors { get; }
+
+        public bool IsEndOfFile =>
+            InputStream.EndOfStream
+            && CurrentCharacterNumber >= CurrentLine.Length - 1;
 
         public InputOutputModule(string inputFileName, string outputFileName)
         {
             InputStream = new StreamReader(inputFileName);
             OutputStream = new StreamWriter(outputFileName);
+
+            CompilationErrors = new List<CompilationError>();
 
             CurrentLineNumber = -1;
             CurrentCharacterNumber = -1;
@@ -49,9 +55,17 @@ namespace PascalCompiler
             return CurrentCharacter;
         }
 
-        public void InsertError()
+        public void InsertError(int lineNumber, int characterNumber, int errorCode) =>
+            InsertError(new CompilationError(lineNumber, characterNumber, errorCode));
+
+        public void InsertError(CompilationError compilationError)
         {
-            throw new NotImplementedException();
+            var indent = new string(Enumerable.Repeat(' ', compilationError.CharacterNumber).ToArray());
+
+            CompilationErrors.Add(compilationError);
+            OutputStream.WriteLine(
+                $"{indent}^ {compilationError.ErrorCode}: " +
+                $"{Constants.CompilationsErrorMessages[compilationError.ErrorCode]}");
         }
 
         public void Dispose()
