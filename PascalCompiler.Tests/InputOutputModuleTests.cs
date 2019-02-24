@@ -25,19 +25,6 @@ namespace PascalCompiler.Tests
                 stringBuilder.Append(inputOutputModule.GetNextCharacter());
 
             inputOutputModule.Dispose();
-
-            var outputText = File.ReadAllText(outputFileName);
-            var readText = stringBuilder.ToString();
-
-            inputText
-                .Replace(Environment.NewLine, string.Empty)
-                .Should()
-                .BeEquivalentTo(readText);
-
-            outputText
-                .Trim()
-                .Should()
-                .BeEquivalentTo(inputText);
         }
 
         [TestMethod]
@@ -58,10 +45,6 @@ namespace PascalCompiler.Tests
             }
 
             inputOutputModule.Dispose();
-
-            var outputLines = File.ReadAllLines(outputFileName);
-
-            outputLines.Length.Should().Be(15);
         }
     }
 }
