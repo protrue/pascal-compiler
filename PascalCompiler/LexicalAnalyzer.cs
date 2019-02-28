@@ -1,6 +1,6 @@
 ﻿namespace PascalCompiler
 {
-    public static partial class Constants
+    public class LexicalAnalyzer
     {
 
     }

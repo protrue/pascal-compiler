@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PascalCompiler.Cli
+﻿namespace PascalCompiler.Cli
 {
     public class Program
     {
