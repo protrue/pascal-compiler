@@ -6,6 +6,33 @@ namespace PascalCompiler
     {
         public static readonly Dictionary<string, Symbol> StringSymbolMap = new Dictionary<string, Symbol>()
         {
+            { "*", Symbol.Asterisk },
+            { "/", Symbol.Slash },
+            { "=", Symbol.Equals },
+            { ",", Symbol.Comma },
+            { ";", Symbol.Semicolon },
+            { ":", Symbol.Colon },
+            { ".", Symbol.Point },
+            { "^", Symbol.Caret },
+            { "(", Symbol.LeftRoundBracket },
+            { ")", Symbol.RightRoundBracket },
+            { "[", Symbol.LeftSquareBracket },
+            { "]", Symbol.RightSquareBracket },
+            { "{", Symbol.LeftCurlyBracket },
+            { "}", Symbol.RightCurlyBracket },
+            { "<", Symbol.Less },
+            { ">", Symbol.Greater },
+            { "<=", Symbol.LessOrEqual },
+            { ">=", Symbol.GreaterOrEqual },
+            { "<>", Symbol.NotEqual },
+            { "+", Symbol.Plus },
+            { "-", Symbol.Minus },
+            { "//", Symbol.Comment },
+            { "(*", Symbol.LeftComment },
+            { ")*", Symbol.RightComment },
+            { ":=", Symbol.Assign },
+            { "..", Symbol.TwoPoints },
+
             { "do", Symbol.Do },
             { "if", Symbol.If },
             { "in", Symbol.In },
@@ -56,6 +83,9 @@ namespace PascalCompiler
             { "procedure", Symbol.Procedure },
             { "qualified", Symbol.Qualified },
             { "implementation", Symbol.Implementation },
+
+            { "TRUE", Symbol.True },
+            { "FALSE", Symbol.False },
         };
     }
 }

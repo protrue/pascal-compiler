@@ -8,7 +8,6 @@ namespace PascalCompiler
     public class InputOutputModule : IDisposable
     {
         private const int IndentLength = 7;
-        public const int MaximumErrorsCount = 99;
 
         public StreamReader InputStream { get; }
         public StreamWriter OutputStream { get; }
@@ -86,7 +85,7 @@ namespace PascalCompiler
         {
             CompilationErrors.Add(compilationError);
 
-            if (CompilationErrors.Count >= MaximumErrorsCount)
+            if (CompilationErrors.Count >= Constants.MaximumErrorsCount)
                 return;
 
             var offset = CreateIndent(CurrentCharacterNumber);

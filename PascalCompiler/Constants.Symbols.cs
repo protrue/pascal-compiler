@@ -55,14 +55,14 @@
             Qualified = 94,
             Implementation = 81,
 
-            Star = 21,
+            Asterisk = 21,
             Slash = 60,
-            Equal = 16,
+            Equals = 16,
             Comma = 20,
             Semicolon = 14,
             Colon = 5,
             Point = 61,
-            Arrow = 62,
+            Caret = 62,
             LeftRoundBracket = 9,
             RightRoundBracket = 4,
             LeftSquareBracket = 11,
@@ -89,6 +89,7 @@
             EndOfLine = 88,
             False = 0,
             True = 1,
+            Comment = 254,
         }
     }
 }
