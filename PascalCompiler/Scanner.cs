@@ -4,7 +4,7 @@ using System.Text;
 
 namespace PascalCompiler
 {
-    public static partial class Constants
+    public class Scanner
     {
 
     }
