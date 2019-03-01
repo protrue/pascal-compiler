@@ -80,9 +80,9 @@
             RightComment = 73,
             Assign = 51,
             TwoPoints = 74,
-            Ident = 2,
+            Identifier = 2,
             FloatConstant = 82,
-            IntConstant = 15,
+            IntegerConstant = 15,
             CharConstant = 83,
             StringConstant = 84,
             EndOfFile = 253,
@@ -90,6 +90,7 @@
             False = 0,
             True = 1,
             Comment = 254,
+            Quote = 255,
         }
     }
 }

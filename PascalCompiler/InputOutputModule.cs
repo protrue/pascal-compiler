@@ -53,7 +53,7 @@ namespace PascalCompiler
 
         private void WriteSourceCodeLine()
         {
-            var indent = CreateIndentWithNumber(IndentLength, CurrentLineNumber);
+            var indent = CreateIndentWithNumber(IndentLength, CurrentLineNumber + 1);
             var outputLine = $"{indent} {CurrentLine}";
 
             OutputStream.WriteLine(outputLine);
@@ -64,10 +64,10 @@ namespace PascalCompiler
             if (CurrentCharacterNumber >= CurrentLine.Length - 1 || CurrentLineNumber == -1)
             {
                 if (IsEndOfFile)
-                    throw new EndOfStreamException(
-                        "Невозможно получить следующую литеру: достигнут конец файла");
+                    throw new EndOfStreamException("Невозможно получить следующую литеру: достигнут конец файла");
 
-                CurrentLine = InputStream.ReadLine();
+                do CurrentLine = InputStream.ReadLine().ToLower();
+                while (CurrentLine.Length == 0);
                 CurrentLineNumber++;
                 CurrentCharacterNumber = -1;
                 WriteSourceCodeLine();
@@ -88,7 +88,7 @@ namespace PascalCompiler
             if (CompilationErrors.Count >= Constants.MaximumErrorsCount)
                 return;
 
-            var offset = CreateIndent(CurrentCharacterNumber);
+            var offset = CreateIndent(compilationError.CharacterNumber);
 
             var indentWithNumber = CreateIndentWithNumber(IndentLength,
                                        CompilationErrors.Count, '*') + offset;

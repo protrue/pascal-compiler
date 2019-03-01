@@ -20,6 +20,7 @@ namespace PascalCompiler
             { "]", Symbol.RightSquareBracket },
             { "{", Symbol.LeftCurlyBracket },
             { "}", Symbol.RightCurlyBracket },
+            { "'", Symbol.Quote },
             { "<", Symbol.Less },
             { ">", Symbol.Greater },
             { "<=", Symbol.LessOrEqual },
@@ -29,10 +30,9 @@ namespace PascalCompiler
             { "-", Symbol.Minus },
             { "//", Symbol.Comment },
             { "(*", Symbol.LeftComment },
-            { ")*", Symbol.RightComment },
+            { "*)", Symbol.RightComment },
             { ":=", Symbol.Assign },
             { "..", Symbol.TwoPoints },
-
             { "do", Symbol.Do },
             { "if", Symbol.If },
             { "in", Symbol.In },
@@ -48,6 +48,7 @@ namespace PascalCompiler
             { "not", Symbol.Not },
             { "set", Symbol.Set },
             { "var", Symbol.Var },
+            { "true", Symbol.True },
             { "case", Symbol.Case },
             { "else", Symbol.Else },
             { "file", Symbol.File },
@@ -58,6 +59,7 @@ namespace PascalCompiler
             { "unit", Symbol.Unit },
             { "uses", Symbol.Uses },
             { "with", Symbol.With },
+            { "false", Symbol.False },
             { "array", Symbol.Array },
             { "begin", Symbol.Begin },
             { "const", Symbol.Const },
@@ -83,9 +85,6 @@ namespace PascalCompiler
             { "procedure", Symbol.Procedure },
             { "qualified", Symbol.Qualified },
             { "implementation", Symbol.Implementation },
-
-            { "TRUE", Symbol.True },
-            { "FALSE", Symbol.False },
         };
     }
 }
