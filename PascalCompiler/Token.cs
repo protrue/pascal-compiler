@@ -11,6 +11,12 @@
         public double? NumericValue { get; set; }
 
         public override string ToString() =>
-            $"{LineNumber}, {CharacterNumber}: {Symbol.ToString()} [{TextValue}] [{NumericValue}]";
+            string.Join('\t',
+                LineNumber.ToString(),
+                CharacterNumber.ToString(),
+                Symbol.ToString(),
+                TextValue,
+                NumericValue.ToString());
+
     }
 }

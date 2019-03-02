@@ -157,7 +157,7 @@ namespace PascalCompiler
                     
                     var symbol = symbolBuilder.ToString();
 
-                    if (Constants.StringSymbolMap.ContainsKey(symbol))
+                    if (Constants.StringSymbolMap.ContainsKey(symbol.ToLower()))
                     {
                         CurrentToken.Symbol = Constants.StringSymbolMap[symbol];
                     }
@@ -208,6 +208,34 @@ namespace PascalCompiler
 
                     if (!IsEndOfTokens)
                         return GetNextToken();
+                }
+
+                if (CurrentToken.Symbol == Constants.Symbol.Quote)
+                {
+                    char nextChar = ' ';
+                    var textConstantBuilder  = new StringBuilder();
+                    while (!InputOutputModule.IsEndOfFile)
+                    {
+                        nextChar = InputOutputModule.GetNextCharacter();
+                        if (nextChar == '\'')
+                            break;
+                        textConstantBuilder.Append(nextChar);
+                    }
+                    
+                    if (textConstantBuilder.Length > 0)
+                    {
+                        CurrentToken.TextValue = textConstantBuilder.ToString();
+                        if (textConstantBuilder.Length == 1)
+                            CurrentToken.Symbol = Constants.Symbol.CharConstant;
+                        else if (textConstantBuilder.Length > 1)
+                            CurrentToken.Symbol = Constants.Symbol.StringConstant;
+                    }
+                    else
+                    {
+                        InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 30);
+                        if (!IsEndOfTokens)
+                            return GetNextToken();
+                    }
                 }
             }
             else

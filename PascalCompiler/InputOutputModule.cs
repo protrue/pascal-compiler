@@ -66,7 +66,7 @@ namespace PascalCompiler
                 if (IsEndOfFile)
                     throw new EndOfStreamException("Невозможно получить следующую литеру: достигнут конец файла");
 
-                do CurrentLine = InputStream.ReadLine().ToLower();
+                do CurrentLine = InputStream.ReadLine();
                 while (CurrentLine.Length == 0);
                 CurrentLineNumber++;
                 CurrentCharacterNumber = -1;
