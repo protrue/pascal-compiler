@@ -56,23 +56,20 @@ namespace PascalCompiler
         {
             if (!Constants.PrefixSymbols.Contains(currentCharacter))
                 CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
+            else if (InputOutputModule.IsEndOfFile)
+                CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
             else
             {
-                if (InputOutputModule.IsEndOfFile)
-                    CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
+                var nextCharacter = InputOutputModule.GetNextCharacter().ToString();
+                var symbol = currentCharacter + nextCharacter;
+
+                if (Constants.StringSymbolMap.ContainsKey(symbol))
+                    CurrentToken.Symbol = Constants.StringSymbolMap[symbol];
                 else
                 {
-                    var nextCharacter = InputOutputModule.GetNextCharacter().ToString();
-                    var symbol = currentCharacter + nextCharacter;
-
-                    if (Constants.StringSymbolMap.ContainsKey(symbol))
-                        CurrentToken.Symbol = Constants.StringSymbolMap[symbol];
-                    else
-                    {
-                        _storedCharacters.Enqueue(nextCharacter);
-                        _storedToken = GetTokenWithCurrentPosition();
-                        CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
-                    }
+                    _storedCharacters.Enqueue(nextCharacter);
+                    _storedToken = GetTokenWithCurrentPosition();
+                    CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
                 }
             }
         }
@@ -144,9 +141,7 @@ namespace PascalCompiler
                     nextCharacter = InputOutputModule.GetNextCharacter();
 
                 if (char.IsLetterOrDigit(nextCharacter))
-                {
                     symbolBuilder.Append(nextCharacter);
-                }
                 else
                 {
                     if (nextCharacter != ' ')
@@ -158,9 +153,7 @@ namespace PascalCompiler
                     var symbol = symbolBuilder.ToString();
 
                     if (Constants.StringSymbolMap.ContainsKey(symbol.ToLower()))
-                    {
                         CurrentToken.Symbol = Constants.StringSymbolMap[symbol];
-                    }
                     else
                     {
                         CurrentToken.Symbol = Constants.Symbol.Identifier;
@@ -170,6 +163,37 @@ namespace PascalCompiler
                     break;
                 }
             }
+        }
+
+        public bool ScanStringOrCharConstant()
+        {
+            var isSuccess = true;
+
+            var nextChar = ' ';
+            var textConstantBuilder = new StringBuilder();
+            while (!InputOutputModule.IsEndOfFile)
+            {
+                nextChar = InputOutputModule.GetNextCharacter();
+                if (nextChar == '\'')
+                    break;
+                textConstantBuilder.Append(nextChar);
+            }
+
+            if (textConstantBuilder.Length > 0)
+            {
+                CurrentToken.TextValue = textConstantBuilder.ToString();
+                if (textConstantBuilder.Length == 1)
+                    CurrentToken.Symbol = Constants.Symbol.CharConstant;
+                else if (textConstantBuilder.Length > 1)
+                    CurrentToken.Symbol = Constants.Symbol.StringConstant;
+            }
+            else
+            {
+                InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 30);
+                isSuccess = false;
+            }
+
+            return isSuccess;
         }
 
         private void SkipComment()
@@ -186,7 +210,8 @@ namespace PascalCompiler
         public Token GetNextToken()
         {
             if (IsEndOfTokens)
-                throw new EndOfStreamException("Невозможно получить следующий символ: достигнут конец файла");
+                throw new EndOfStreamException(
+                    "Невозможно получить следующий символ: достигнут конец файла");
 
             var currentCharacter = GetCurrentCharacter();
 
@@ -197,45 +222,19 @@ namespace PascalCompiler
                 if (CurrentToken.Symbol == Constants.Symbol.Comment)
                 {
                     SkipComment();
-
-                    if (!IsEndOfTokens)
-                        return GetNextToken();
+                    if (!IsEndOfTokens) return GetNextToken();
                 }
 
                 if (CurrentToken.Symbol == Constants.Symbol.LeftComment)
                 {
                     while (GetNextToken().Symbol != Constants.Symbol.RightComment) ;
-
-                    if (!IsEndOfTokens)
-                        return GetNextToken();
+                    if (!IsEndOfTokens) return GetNextToken();
                 }
 
                 if (CurrentToken.Symbol == Constants.Symbol.Quote)
                 {
-                    char nextChar = ' ';
-                    var textConstantBuilder  = new StringBuilder();
-                    while (!InputOutputModule.IsEndOfFile)
-                    {
-                        nextChar = InputOutputModule.GetNextCharacter();
-                        if (nextChar == '\'')
-                            break;
-                        textConstantBuilder.Append(nextChar);
-                    }
-                    
-                    if (textConstantBuilder.Length > 0)
-                    {
-                        CurrentToken.TextValue = textConstantBuilder.ToString();
-                        if (textConstantBuilder.Length == 1)
-                            CurrentToken.Symbol = Constants.Symbol.CharConstant;
-                        else if (textConstantBuilder.Length > 1)
-                            CurrentToken.Symbol = Constants.Symbol.StringConstant;
-                    }
-                    else
-                    {
-                        InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 30);
-                        if (!IsEndOfTokens)
-                            return GetNextToken();
-                    }
+                    var isSuccess = ScanStringOrCharConstant();
+                    if (!isSuccess && !IsEndOfTokens) return GetNextToken();
                 }
             }
             else
