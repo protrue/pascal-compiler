@@ -140,7 +140,7 @@ namespace PascalCompiler
                 if (!InputOutputModule.IsEndOfFile)
                     nextCharacter = InputOutputModule.GetNextCharacter();
 
-                if (char.IsLetterOrDigit(nextCharacter))
+                if (char.IsLetterOrDigit(nextCharacter) || nextCharacter == '_')
                     symbolBuilder.Append(nextCharacter);
                 else
                 {
