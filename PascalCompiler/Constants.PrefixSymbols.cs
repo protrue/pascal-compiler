@@ -11,7 +11,6 @@ namespace PascalCompiler
         /// </summary>
         public static HashSet<string> PrefixSymbols = new HashSet<string>()
         {
-            "*",    // *)
             "/",    // //
             ":",    // :=
             ".",    // ..

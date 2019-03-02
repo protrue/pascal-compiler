@@ -71,6 +71,7 @@ namespace PascalCompiler
                 CurrentLineNumber++;
                 CurrentCharacterNumber = -1;
                 WriteSourceCodeLine();
+                return ' ';
             }
 
             CurrentCharacter = CurrentLine[++CurrentCharacterNumber];

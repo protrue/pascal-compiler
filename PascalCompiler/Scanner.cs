@@ -74,129 +74,103 @@ namespace PascalCompiler
             }
         }
 
-        public void ScanNumericConstant(string currentCharacter)
+        private string ScanSymbol(string currentCharacter, Func<char, bool> appendPredicate)
         {
             var symbolBuilder = new StringBuilder();
             symbolBuilder.Append(currentCharacter);
 
             CurrentToken = GetTokenWithCurrentPosition();
 
-            while (true)
+            var nextCharacter = ' ';
+            while (!InputOutputModule.IsEndOfFile)
             {
-                var nextCharacter = ' ';
-                if (!InputOutputModule.IsEndOfFile)
-                    nextCharacter = InputOutputModule.GetNextCharacter();
+                nextCharacter = InputOutputModule.GetNextCharacter();
 
-                if (char.IsDigit(nextCharacter) || nextCharacter == '.')
+                if (appendPredicate(nextCharacter))
                     symbolBuilder.Append(nextCharacter);
-                else
-                {
-                    var symbol = symbolBuilder.ToString();
+                else break;
+            }
 
-                    if (symbol.Last() == '.')
-                    {
-                        _storedCharacters.Enqueue(symbol.Last().ToString());
-                        symbol = symbol.Remove(symbol.Length - 1, 1);
-                        _storedToken = new Token()
-                        {
-                            CharacterNumber = InputOutputModule.CurrentCharacterNumber - 1,
-                            LineNumber = InputOutputModule.CurrentLineNumber - 1
-                        };
-                    }
-                    else
-                        _storedToken = GetTokenWithCurrentPosition();
+            if (nextCharacter != ' ' && !appendPredicate(nextCharacter))
+            {
+                _storedCharacters.Enqueue(nextCharacter.ToString());
+                _storedToken = GetTokenWithCurrentPosition();
+            }
 
-                    if (nextCharacter != ' ')
-                        _storedCharacters.Enqueue(nextCharacter.ToString());
+            return symbolBuilder.ToString();
+        }
 
-                    var isParsed = double.TryParse(symbol, NumberStyles.AllowDecimalPoint,
-                        NumberFormatInfo.InvariantInfo, out var numericConstantValue);
+        private void ScanNumericConstant(string currentCharacter)
+        {
+            var onlyOneDot = true;
+            var symbol = ScanSymbol(currentCharacter, c =>
+            {
+                var result = char.IsDigit(c) || c == '.' && onlyOneDot;
+                if (c == '.') onlyOneDot = false;
+                return result;
+            });
 
-                    CurrentToken.NumericValue = numericConstantValue;
+            var isParsed = double.TryParse(symbol, NumberStyles.AllowDecimalPoint,
+                NumberFormatInfo.InvariantInfo, out var numericConstantValue);
 
-                    CurrentToken.Symbol =
-                        symbol.Contains('.')
-                        ? Constants.Symbol.FloatConstant
-                        : Constants.Symbol.IntegerConstant;
+            CurrentToken.NumericValue = numericConstantValue;
 
-                    if (CurrentToken.Symbol == Constants.Symbol.IntegerConstant && CurrentToken.NumericValue > Constants.MaximumIntegerValue)
-                        InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 97);
+            CurrentToken.Symbol =
+                symbol.Contains('.')
+                    ? Constants.Symbol.FloatConstant
+                    : Constants.Symbol.IntegerConstant;
 
-                    break;
-                }
+            if (CurrentToken.Symbol == Constants.Symbol.IntegerConstant && CurrentToken.NumericValue > Constants.MaximumIntegerValue)
+                InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 97);
+        }
+
+        private void ScanKeywordOrIdentifier(string currentCharacter)
+        {
+            var symbol = ScanSymbol(currentCharacter, c => char.IsLetterOrDigit(c) || c == '_');
+
+            if (Constants.StringSymbolMap.ContainsKey(symbol.ToLower()))
+                CurrentToken.Symbol = Constants.StringSymbolMap[symbol.ToLower()];
+            else
+            {
+                CurrentToken.Symbol = Constants.Symbol.Identifier;
+                CurrentToken.TextValue = symbol;
             }
         }
 
-        public void ScanKeywordOrIdentifier(string currentCharacter)
+        private bool ScanStringOrCharConstant()
         {
-            var symbolBuilder = new StringBuilder();
-            symbolBuilder.Append(currentCharacter);
-
-            CurrentToken = GetTokenWithCurrentPosition();
-
-            while (true)
-            {
-                var nextCharacter = ' ';
-                if (!InputOutputModule.IsEndOfFile)
-                    nextCharacter = InputOutputModule.GetNextCharacter();
-
-                if (char.IsLetterOrDigit(nextCharacter) || nextCharacter == '_')
-                    symbolBuilder.Append(nextCharacter);
-                else
-                {
-                    if (nextCharacter != ' ')
-                    {
-                        _storedCharacters.Enqueue(nextCharacter.ToString());
-                        _storedToken = GetTokenWithCurrentPosition();
-                    }
-                    
-                    var symbol = symbolBuilder.ToString();
-
-                    if (Constants.StringSymbolMap.ContainsKey(symbol.ToLower()))
-                        CurrentToken.Symbol = Constants.StringSymbolMap[symbol];
-                    else
-                    {
-                        CurrentToken.Symbol = Constants.Symbol.Identifier;
-                        CurrentToken.TextValue = symbol;
-                    }
-
-                    break;
-                }
-            }
-        }
-
-        public bool ScanStringOrCharConstant()
-        {
-            var isSuccess = true;
+            var textConstantBuilder = new StringBuilder();
 
             var nextChar = ' ';
-            var textConstantBuilder = new StringBuilder();
             while (!InputOutputModule.IsEndOfFile)
             {
                 nextChar = InputOutputModule.GetNextCharacter();
-                if (nextChar == '\'')
-                    break;
+                if (nextChar == '\'') break;
                 textConstantBuilder.Append(nextChar);
+            }
+
+            if (nextChar != '\'')
+            {
+                InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 30);
+                return false;
             }
 
             if (textConstantBuilder.Length > 0)
             {
                 CurrentToken.TextValue = textConstantBuilder.ToString();
-                if (textConstantBuilder.Length == 1)
-                    CurrentToken.Symbol = Constants.Symbol.CharConstant;
-                else if (textConstantBuilder.Length > 1)
-                    CurrentToken.Symbol = Constants.Symbol.StringConstant;
+                if (textConstantBuilder.Length == 1) CurrentToken.Symbol = Constants.Symbol.CharConstant;
+                else if (textConstantBuilder.Length > 1) CurrentToken.Symbol = Constants.Symbol.StringConstant;
             }
             else
             {
                 InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 30);
-                isSuccess = false;
+                return false;
             }
 
-            return isSuccess;
+            return true;
         }
 
-        private void SkipComment()
+        private void SkipDoubleSlashComment()
         {
             _storedCharacters.Clear();
             var storedCharacter = ' ';
@@ -207,48 +181,74 @@ namespace PascalCompiler
                 _storedCharacters.Enqueue(storedCharacter.ToString());
         }
 
+        private void SkipAsteriskParenthesisComment()
+        {
+            try
+            {
+                while (true)
+                {
+                    if (InputOutputModule.GetNextCharacter() != '*') continue;
+                    if (InputOutputModule.GetNextCharacter() == ')')
+                        break;
+                }
+            }
+            catch (EndOfStreamException endOfStreamException)
+            {
+                InputOutputModule.InsertError(InputOutputModule.CurrentLineNumber, InputOutputModule.CurrentCharacterNumber,
+                    32);
+            }
+        }
+
+        private void SkipCurlyBracketComment()
+        {
+            try
+            {
+                while (InputOutputModule.GetNextCharacter() != '}') ;
+            }
+            catch (EndOfStreamException endOfStreamException)
+            {
+                InputOutputModule.InsertError(InputOutputModule.CurrentLineNumber, InputOutputModule.CurrentCharacterNumber,
+                    32);
+            }
+        }
+
         public Token GetNextToken()
         {
-            if (IsEndOfTokens)
-                throw new EndOfStreamException(
-                    "Невозможно получить следующий символ: достигнут конец файла");
+            if (IsEndOfTokens) return null;
 
             var currentCharacter = GetCurrentCharacter();
 
-            if (Constants.TypographicalSymbols.Contains(currentCharacter))
+            if (currentCharacter == "'")
+            {
+                var isSuccess = ScanStringOrCharConstant();
+                if (!isSuccess) return GetNextToken();
+            }
+            else if (char.IsDigit(currentCharacter, 0))
+                ScanNumericConstant(currentCharacter);
+            else if (char.IsLetter(currentCharacter, 0))
+                ScanKeywordOrIdentifier(currentCharacter);
+            else if (Constants.TypographicalSymbols.Contains(currentCharacter))
             {
                 ScanTypographicalSymbol(currentCharacter);
 
-                if (CurrentToken.Symbol == Constants.Symbol.Comment)
+                switch (CurrentToken.Symbol)
                 {
-                    SkipComment();
-                    if (!IsEndOfTokens) return GetNextToken();
-                }
-
-                if (CurrentToken.Symbol == Constants.Symbol.LeftComment)
-                {
-                    while (GetNextToken().Symbol != Constants.Symbol.RightComment) ;
-                    if (!IsEndOfTokens) return GetNextToken();
-                }
-
-                if (CurrentToken.Symbol == Constants.Symbol.Quote)
-                {
-                    var isSuccess = ScanStringOrCharConstant();
-                    if (!isSuccess && !IsEndOfTokens) return GetNextToken();
+                    case Constants.Symbol.Comment:
+                        SkipDoubleSlashComment();
+                        return GetNextToken();
+                    case Constants.Symbol.LeftComment:
+                        SkipAsteriskParenthesisComment();
+                        return GetNextToken();
+                    case Constants.Symbol.LeftCurlyBracket:
+                        SkipCurlyBracketComment();
+                        return GetNextToken();
                 }
             }
-            else
-            if (char.IsDigit(currentCharacter, 0))
-                ScanNumericConstant(currentCharacter);
-            else
-            if (char.IsLetter(currentCharacter, 0))
-                ScanKeywordOrIdentifier(currentCharacter);
             else
             {
                 InputOutputModule.InsertError(InputOutputModule.CurrentLineNumber,
                     InputOutputModule.CurrentCharacterNumber, 5);
-                if (!IsEndOfTokens)
-                    return GetNextToken();
+                return GetNextToken();
             }
 
             return CurrentToken;

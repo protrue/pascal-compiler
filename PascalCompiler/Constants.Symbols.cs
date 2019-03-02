@@ -90,7 +90,6 @@
             False = 0,
             True = 1,
             Comment = 254,
-            Quote = 255,
         }
     }
 }
