@@ -22,7 +22,7 @@ namespace PascalCompiler
 
         public bool IsEndOfFile =>
             InputStream.EndOfStream
-            && CurrentCharacterNumber >= CurrentLine.Length - 1;
+            && CurrentCharacter == '\n';
 
         public InputOutputModule(string inputFileName, string outputFileName)
         {
@@ -54,14 +54,21 @@ namespace PascalCompiler
         private void WriteSourceCodeLine()
         {
             var indent = CreateIndentWithNumber(IndentLength, CurrentLineNumber + 1);
-            var outputLine = $"{indent} {CurrentLine}";
+            var outputLine = $"{indent} {CurrentLine.Replace("\t", " ")}";
 
             OutputStream.WriteLine(outputLine);
         }
 
         public char GetNextCharacter()
         {
-            if (CurrentCharacterNumber >= CurrentLine.Length - 1 || CurrentLineNumber == -1)
+            if (CurrentCharacterNumber == CurrentLine.Length - 1)
+            {
+                CurrentCharacter = '\n';
+                CurrentCharacterNumber++;
+                return CurrentCharacter;
+            }
+
+            if (CurrentCharacterNumber > CurrentLine.Length - 1 || CurrentLineNumber == -1)
             {
                 if (IsEndOfFile)
                     throw new EndOfStreamException("Невозможно получить следующую литеру: достигнут конец файла");
@@ -71,7 +78,6 @@ namespace PascalCompiler
                 CurrentLineNumber++;
                 CurrentCharacterNumber = -1;
                 WriteSourceCodeLine();
-                return ' ';
             }
 
             CurrentCharacter = CurrentLine[++CurrentCharacterNumber];

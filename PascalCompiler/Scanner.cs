@@ -145,7 +145,7 @@ namespace PascalCompiler
             while (!InputOutputModule.IsEndOfFile)
             {
                 nextChar = InputOutputModule.GetNextCharacter();
-                if (nextChar == '\'') break;
+                if (nextChar == '\'' || nextChar == '\n') break;
                 textConstantBuilder.Append(nextChar);
             }
 
@@ -173,12 +173,9 @@ namespace PascalCompiler
         private void SkipDoubleSlashComment()
         {
             _storedCharacters.Clear();
-            var storedCharacter = ' ';
-            while (!InputOutputModule.IsEndOfFile &&
-                   InputOutputModule.CurrentLineNumber == CurrentToken.LineNumber)
-                storedCharacter = InputOutputModule.GetNextCharacter();
-            if (!InputOutputModule.IsEndOfFile)
-                _storedCharacters.Enqueue(storedCharacter.ToString());
+            var nextCharacter = ' ';
+            while (!InputOutputModule.IsEndOfFile && nextCharacter != '\n')
+                nextCharacter = InputOutputModule.GetNextCharacter();
         }
 
         private void SkipAsteriskParenthesisComment()
