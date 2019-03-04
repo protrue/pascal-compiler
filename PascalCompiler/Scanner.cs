@@ -215,6 +215,8 @@ namespace PascalCompiler
 
             var currentCharacter = GetCurrentCharacter();
 
+            if (string.IsNullOrWhiteSpace(currentCharacter)) return GetNextToken();
+
             if (currentCharacter == "'")
             {
                 var isSuccess = ScanStringOrCharConstant();
