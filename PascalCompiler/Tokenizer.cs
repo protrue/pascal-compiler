@@ -7,28 +7,28 @@ using System.Text;
 
 namespace PascalCompiler
 {
-    public class Scanner
+    public class Tokenizer
     {
-        public InputOutputModule InputOutputModule { get; set; }
+        public IoManager IoManager { get; set; }
 
-        public bool IsEndOfTokens => InputOutputModule.IsEndOfFile && _storedCharacters.Count == 0;
+        public bool IsEndOfTokens => IoManager.IsEndOfFile && _storedCharacters.Count == 0;
 
         public Token CurrentToken { get; private set; }
 
         private Queue<string> _storedCharacters;
         private Token _storedToken;
 
-        public Scanner(InputOutputModule inputOutputModule)
+        public Tokenizer(IoManager ioManager)
         {
-            InputOutputModule = inputOutputModule;
+            IoManager = ioManager;
             _storedCharacters = new Queue<string>();
             _storedToken = new Token();
         }
 
         private Token GetTokenWithCurrentPosition() => new Token
         {
-            LineNumber = InputOutputModule.CurrentLineNumber,
-            CharacterNumber = InputOutputModule.CurrentCharacterNumber,
+            LineNumber = IoManager.CurrentLineNumber,
+            CharacterNumber = IoManager.CurrentCharacterNumber,
         };
 
         private string GetCurrentCharacter()
@@ -44,10 +44,10 @@ namespace PascalCompiler
                 }
                 else
                 {
-                    currentCharacter = InputOutputModule.GetNextCharacter().ToString();
+                    currentCharacter = IoManager.GetNextCharacter().ToString();
                     CurrentToken = GetTokenWithCurrentPosition();
                 }
-            } while (!InputOutputModule.IsEndOfFile && string.IsNullOrWhiteSpace(currentCharacter));
+            } while (!IoManager.IsEndOfFile && string.IsNullOrWhiteSpace(currentCharacter));
 
             return currentCharacter;
         }
@@ -56,11 +56,11 @@ namespace PascalCompiler
         {
             if (!Constants.PrefixSymbols.Contains(currentCharacter))
                 CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
-            else if (InputOutputModule.IsEndOfFile)
+            else if (IoManager.IsEndOfFile)
                 CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
             else
             {
-                var nextCharacter = InputOutputModule.GetNextCharacter().ToString();
+                var nextCharacter = IoManager.GetNextCharacter().ToString();
                 var symbol = currentCharacter + nextCharacter;
 
                 if (Constants.StringSymbolMap.ContainsKey(symbol))
@@ -82,9 +82,9 @@ namespace PascalCompiler
             CurrentToken = GetTokenWithCurrentPosition();
 
             var nextCharacter = ' ';
-            while (!InputOutputModule.IsEndOfFile)
+            while (!IoManager.IsEndOfFile)
             {
-                nextCharacter = InputOutputModule.GetNextCharacter();
+                nextCharacter = IoManager.GetNextCharacter();
 
                 if (appendPredicate(nextCharacter))
                     symbolBuilder.Append(nextCharacter);
@@ -102,26 +102,34 @@ namespace PascalCompiler
 
         private void ScanNumericConstant(string currentCharacter)
         {
-            var onlyOneDot = true;
+            var gotDot = false;
+            var isExponential = false;
+            var lastChar = ' ';
             var symbol = ScanSymbol(currentCharacter, c =>
             {
-                var result = char.IsDigit(c) || c == '.' && onlyOneDot;
-                if (c == '.') onlyOneDot = false;
+                var result =
+                    char.IsDigit(c) && (lastChar != 'E' || lastChar != 'e')
+                    || c == '.' && !gotDot && !isExponential
+                    || char.IsDigit(lastChar) && (c == 'E' || c == 'e') && !isExponential
+                    || isExponential && (c == '+' || c == '-');
+                if (c == '.') gotDot = true;
+                if (c == 'E' || c == 'e') isExponential = true;
+                lastChar = c;
                 return result;
             });
 
-            var isParsed = double.TryParse(symbol, NumberStyles.AllowDecimalPoint,
+            var isParsed = double.TryParse(symbol, NumberStyles.Float,
                 NumberFormatInfo.InvariantInfo, out var numericConstantValue);
 
             CurrentToken.NumericValue = numericConstantValue;
 
             CurrentToken.Symbol =
-                symbol.Contains('.')
+                    gotDot
                     ? Constants.Symbol.FloatConstant
                     : Constants.Symbol.IntegerConstant;
 
             if (CurrentToken.Symbol == Constants.Symbol.IntegerConstant && CurrentToken.NumericValue > Constants.MaximumIntegerValue)
-                InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 97);
+                IoManager.InsertError(CurrentToken.CharacterNumber, 203);
         }
 
         private void ScanKeywordOrIdentifier(string currentCharacter)
@@ -142,16 +150,16 @@ namespace PascalCompiler
             var textConstantBuilder = new StringBuilder();
 
             var nextChar = ' ';
-            while (!InputOutputModule.IsEndOfFile)
+            while (!IoManager.IsEndOfFile)
             {
-                nextChar = InputOutputModule.GetNextCharacter();
+                nextChar = IoManager.GetNextCharacter();
                 if (nextChar == '\'' || nextChar == '\n') break;
                 textConstantBuilder.Append(nextChar);
             }
 
             if (nextChar != '\'')
             {
-                InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 30);
+                IoManager.InsertError(CurrentToken.CharacterNumber, 75);
                 return false;
             }
 
@@ -163,7 +171,7 @@ namespace PascalCompiler
             }
             else
             {
-                InputOutputModule.InsertError(CurrentToken.LineNumber, CurrentToken.CharacterNumber, 30);
+                IoManager.InsertError(CurrentToken.CharacterNumber, 75);
                 return false;
             }
 
@@ -174,8 +182,8 @@ namespace PascalCompiler
         {
             _storedCharacters.Clear();
             var nextCharacter = ' ';
-            while (!InputOutputModule.IsEndOfFile && nextCharacter != '\n')
-                nextCharacter = InputOutputModule.GetNextCharacter();
+            while (!IoManager.IsEndOfFile && nextCharacter != '\n')
+                nextCharacter = IoManager.GetNextCharacter();
         }
 
         private void SkipAsteriskParenthesisComment()
@@ -184,15 +192,15 @@ namespace PascalCompiler
             {
                 while (true)
                 {
-                    if (InputOutputModule.GetNextCharacter() != '*') continue;
-                    if (InputOutputModule.GetNextCharacter() == ')')
+                    if (IoManager.GetNextCharacter() != '*') continue;
+                    if (IoManager.GetNextCharacter() == ')')
                         break;
                 }
             }
             catch (EndOfStreamException endOfStreamException)
             {
-                InputOutputModule.InsertError(InputOutputModule.CurrentLineNumber, InputOutputModule.CurrentCharacterNumber,
-                    32);
+                IoManager.InsertError(IoManager.CurrentCharacterNumber,
+                    86);
             }
         }
 
@@ -200,12 +208,12 @@ namespace PascalCompiler
         {
             try
             {
-                while (InputOutputModule.GetNextCharacter() != '}') ;
+                while (IoManager.GetNextCharacter() != '}') ;
             }
             catch (EndOfStreamException endOfStreamException)
             {
-                InputOutputModule.InsertError(InputOutputModule.CurrentLineNumber, InputOutputModule.CurrentCharacterNumber,
-                    32);
+                IoManager.InsertError(IoManager.CurrentCharacterNumber,
+                    86);
             }
         }
 
@@ -245,8 +253,7 @@ namespace PascalCompiler
             }
             else
             {
-                InputOutputModule.InsertError(InputOutputModule.CurrentLineNumber,
-                    InputOutputModule.CurrentCharacterNumber, 5);
+                IoManager.InsertError(IoManager.CurrentCharacterNumber, 6);
                 return GetNextToken();
             }
 

@@ -34,9 +34,9 @@ namespace PascalCompiler.Tests
 while";
             File.WriteAllText(inputFileName, inputText);
 
-            var inputOutputModule = new InputOutputModule(inputFileName, outputFileName);
+            var inputOutputModule = new IoManager(inputFileName, outputFileName);
 
-            var scanner = new Scanner(inputOutputModule);
+            var scanner = new Tokenizer(inputOutputModule);
             var tokens = new List<Token>();
 
             while (!scanner.IsEndOfTokens)

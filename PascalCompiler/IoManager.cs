@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace PascalCompiler
 {
-    public class InputOutputModule : IDisposable
+    public class IoManager : IDisposable
     {
         private const int IndentLength = 7;
 
@@ -24,10 +24,10 @@ namespace PascalCompiler
             InputStream.EndOfStream
             && CurrentCharacter == '\n';
 
-        public InputOutputModule(string inputFileName, string outputFileName)
+        public IoManager(Stream inputStream, Stream outputStream)
         {
-            InputStream = new StreamReader(inputFileName);
-            OutputStream = new StreamWriter(outputFileName);
+            InputStream = new StreamReader(inputStream);
+            OutputStream = new StreamWriter(outputStream);
 
             CompilationErrors = new List<CompilationError>();
 
@@ -35,6 +35,14 @@ namespace PascalCompiler
             CurrentCharacterNumber = -1;
 
             CurrentLine = string.Empty;
+        }
+
+        public IoManager(string inputFileName, string outputFileName)
+            : this(
+                new FileStream(inputFileName, FileMode.Open, FileAccess.Read),
+                new FileStream(outputFileName, FileMode.OpenOrCreate, FileAccess.Write))
+        {
+
         }
 
         private string CreateIndent(int length, char filler = ' ') =>
@@ -85,8 +93,8 @@ namespace PascalCompiler
             return CurrentCharacter;
         }
 
-        public void InsertError(int lineNumber, int characterNumber, int errorCode) =>
-            InsertError(new CompilationError(lineNumber, characterNumber, errorCode));
+        public void InsertError(int characterNumber, int errorCode) =>
+            InsertError(new CompilationError(CurrentLineNumber, characterNumber, errorCode));
 
         public void InsertError(CompilationError compilationError)
         {
@@ -107,7 +115,7 @@ namespace PascalCompiler
                 $"код ошибки: {compilationError.ErrorCode}");
             OutputStream.WriteLine(
                 $"{asteriskIndent} " +
-                $"{Constants.CompilationsErrorMessages[compilationError.ErrorCode]}");
+                $"{Constants.ErrorsMap[compilationError.ErrorCode]}");
         }
 
         public void Dispose()

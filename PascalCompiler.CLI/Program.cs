@@ -15,19 +15,19 @@ namespace PascalCompiler.Cli
             if (!File.Exists(DefaultInputFilePath))
                 File.Create(DefaultInputFilePath);
 
-            var inputOutputModule = new InputOutputModule(DefaultInputFilePath, DefaultOutputFilePath);
-            var scanner = new Scanner(inputOutputModule);
+            var ioManager = new IoManager(DefaultInputFilePath, DefaultOutputFilePath);
+            var tokenizer = new Tokenizer(ioManager);
 
             var tokens = new List<Token>();
-            while (!scanner.IsEndOfTokens)
-                 tokens.Add(scanner.GetNextToken());
+            while (!tokenizer.IsEndOfTokens)
+                 tokens.Add(tokenizer.GetNextToken());
 
-            inputOutputModule.OutputStream.WriteLine($"{Environment.NewLine}Tokens:");
+            ioManager.OutputStream.WriteLine($"{Environment.NewLine}Tokens:");
 
             foreach (var token in tokens)
-                inputOutputModule.OutputStream.WriteLine(token);
+                ioManager.OutputStream.WriteLine(token);
 
-            inputOutputModule.Dispose();
+            ioManager.Dispose();
 
             Console.WriteLine(File.ReadAllText(DefaultOutputFilePath));
             Console.ReadKey();
