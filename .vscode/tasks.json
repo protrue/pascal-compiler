@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/PascalCompiler.Tests/PascalCompiler.Tests.csproj"
+                "${workspaceFolder}/PascalCompiler.Cli/PascalCompiler.Cli.csproj"
             ],
             "problemMatcher": "$tsc"
         },
@@ -17,7 +17,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/PascalCompiler.Tests/PascalCompiler.Tests.csproj"
+                "${workspaceFolder}/PascalCompiler.Cli/PascalCompiler.Cli.csproj"
             ],
             "problemMatcher": "$tsc"
         },
@@ -28,7 +28,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/PascalCompiler.Tests/PascalCompiler.Tests.csproj"
+                "${workspaceFolder}/PascalCompiler.Cli/PascalCompiler.Cli.csproj"
             ],
             "problemMatcher": "$tsc"
         }

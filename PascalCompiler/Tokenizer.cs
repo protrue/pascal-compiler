@@ -7,7 +7,7 @@ using System.Text;
 
 namespace PascalCompiler
 {
-    public class Tokenizer
+    public class Tokenizer : IDisposable
     {
         public IoManager IoManager { get; set; }
 
@@ -15,12 +15,17 @@ namespace PascalCompiler
 
         public Token CurrentToken { get; private set; }
 
+        public HashSet<string> Names { get; private set; }
+
         private Queue<string> _storedCharacters;
         private Token _storedToken;
 
         public Tokenizer(IoManager ioManager)
         {
             IoManager = ioManager;
+
+            Names = new HashSet<string>();
+
             _storedCharacters = new Queue<string>();
             _storedToken = new Token();
         }
@@ -142,6 +147,7 @@ namespace PascalCompiler
             {
                 CurrentToken.Symbol = Constants.Symbol.Identifier;
                 CurrentToken.TextValue = symbol;
+                Names.Add(symbol);
             }
         }
 
@@ -258,6 +264,11 @@ namespace PascalCompiler
             }
 
             return CurrentToken;
+        }
+
+        public void Dispose()
+        {
+            IoManager.Dispose();
         }
     }
 }

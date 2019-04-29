@@ -39,8 +39,8 @@ namespace PascalCompiler
 
         public IoManager(string inputFileName, string outputFileName)
             : this(
-                new FileStream(inputFileName, FileMode.Open, FileAccess.Read),
-                new FileStream(outputFileName, FileMode.OpenOrCreate, FileAccess.Write))
+                new FileStream(inputFileName, FileMode.OpenOrCreate, FileAccess.Read),
+                new FileStream(outputFileName, FileMode.Create, FileAccess.Write))
         {
 
         }

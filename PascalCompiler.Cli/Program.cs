@@ -2,34 +2,67 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Configuration;
+using System.Linq;
 
 namespace PascalCompiler.Cli
 {
     public class Program
     {
-        public static string DefaultInputFilePath = ConfigurationManager.AppSettings["DefaultInputFilePath"];
-        public static string DefaultOutputFilePath = ConfigurationManager.AppSettings["DefaultOutputFilePath"];
+        public static string InputFilePath = ConfigurationManager.AppSettings["InputFilePath"];
+        public static string OutputFilePath = ConfigurationManager.AppSettings["OutputFilePath"];
+
+        public static void TestIoManager()
+        {
+            var compiler = new Compiler(InputFilePath, OutputFilePath);
+
+            Console.WriteLine("IoManager test");
+
+            var letters = new List<char>();
+            while (!compiler.IoManager.IsEndOfFile)
+            {
+                letters.Add(compiler.IoManager.GetNextCharacter());
+            }
+
+            compiler.Dispose();
+
+            Console.WriteLine(string.Join("-", letters.Select(l => $"[{l}]")));
+        }
+
+        public static void TestTokenizer()
+        {
+            var compiler = new Compiler(InputFilePath, OutputFilePath);
+
+            Console.WriteLine("Tokenizer test");
+
+            var tokens = new List<Token>();
+
+            while (!compiler.Tokenizer.IsEndOfTokens)
+            {
+                tokens.Add(compiler.Tokenizer.GetNextToken());
+            }
+
+            compiler.Dispose();
+
+            var tokensString = string.Join(Environment.NewLine, tokens);
+            var namesString = string.Join(Environment.NewLine, compiler.Tokenizer.Names);
+            Console.WriteLine($"{tokensString}{Environment.NewLine}{namesString}");
+        }
+
+        public static void TestAnalyzer()
+        {
+            var compiler = new Compiler(InputFilePath, OutputFilePath);
+
+            Console.WriteLine("Analyzer test");
+
+            compiler.Dispose();
+        }
 
         public static void Main(string[] args)
         {
-            if (!File.Exists(DefaultInputFilePath))
-                File.Create(DefaultInputFilePath);
+            TestIoManager();
+            TestTokenizer();
+            // TestAnalyzer();
 
-            var ioManager = new IoManager(DefaultInputFilePath, DefaultOutputFilePath);
-            var tokenizer = new Tokenizer(ioManager);
-
-            var tokens = new List<Token>();
-            while (!tokenizer.IsEndOfTokens)
-                 tokens.Add(tokenizer.GetNextToken());
-
-            ioManager.OutputStream.WriteLine($"{Environment.NewLine}Tokens:");
-
-            foreach (var token in tokens)
-                ioManager.OutputStream.WriteLine(token);
-
-            ioManager.Dispose();
-
-            Console.WriteLine(File.ReadAllText(DefaultOutputFilePath));
             Console.ReadKey();
         }
     }

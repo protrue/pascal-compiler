@@ -10,7 +10,7 @@
         public double? NumericValue { get; set; }
 
         public override string ToString() =>
-            string.Join('\t',
+            string.Join(' ',
                 LineNumber.ToString(),
                 CharacterNumber.ToString(),
                 Symbol.ToString(),

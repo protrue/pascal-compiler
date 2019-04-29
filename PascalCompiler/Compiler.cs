@@ -5,15 +5,35 @@ using System.Text;
 
 namespace PascalCompiler
 {
-    public class Compiler
+    public class Compiler : IDisposable
     {
-        public IoManager InputOutputModule { get; set; }
+        public IoManager IoManager { get; set; }
         public Tokenizer Tokenizer { get; set; }
-        public Parser Parser { get; set; }
+        public Analyzer Analyzer { get; set; }
+
+        private Compiler()
+        {
+            Tokenizer = new Tokenizer(IoManager);
+            Analyzer = new Analyzer(IoManager, Tokenizer);
+        }
 
         public Compiler(Stream inputStream, Stream outputStream)
         {
-            InputOutputModule = new IoManager(inputStream, outputStream);
+            IoManager = new IoManager(inputStream, outputStream);
+            Tokenizer = new Tokenizer(IoManager);
+            Analyzer = new Analyzer(IoManager, Tokenizer);
+        }
+
+        public Compiler(string inputPath, string outputPath)
+        {
+            IoManager = new IoManager(inputPath, outputPath);
+            Tokenizer = new Tokenizer(IoManager);
+            Analyzer = new Analyzer(IoManager, Tokenizer);
+        }
+
+        public void Dispose()
+        {
+            Analyzer.Dispose();
         }
     }
 }
