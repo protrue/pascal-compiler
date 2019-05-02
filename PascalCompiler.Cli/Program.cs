@@ -54,16 +54,18 @@ namespace PascalCompiler.Cli
 
             Console.WriteLine("Analyzer test");
 
+            compiler.Analyzer.Analyze();
+
             compiler.Dispose();
+
+            Console.WriteLine(File.ReadAllText(OutputFilePath));
         }
 
         public static void Main(string[] args)
         {
             TestIoManager();
             TestTokenizer();
-            // TestAnalyzer();
-
-            Console.ReadKey();
+            TestAnalyzer();
         }
     }
 }
