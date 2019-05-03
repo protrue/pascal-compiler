@@ -10,4 +10,8 @@
   10    with a do begin b := 5 end;
   11    while a do begin if a <> 0 then b:= c else a :=2+2 end;
   12    if a then b:=b else if a then b:=b else c:=c;
-  13    end.
+  13    case NUM of
+  14    0,2,3,4,a,'123':b:=b;
+  15    1:b:=b
+  16    end;
+  17    end.

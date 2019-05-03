@@ -276,6 +276,11 @@ namespace PascalCompiler
             AnalyzeExpression();
             AcceptTerminal(Symbol.Of);
             AnalyzeCaseElement();
+            while (CurrentSymbol == Symbol.Semicolon)
+            {
+                AcceptTerminal(Symbol.Semicolon);
+                AnalyzeCaseElement();
+            }
             AcceptTerminal(Symbol.End);
         }
 
