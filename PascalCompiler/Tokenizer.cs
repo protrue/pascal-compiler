@@ -109,7 +109,7 @@ namespace PascalCompiler
         {
             var gotDot = false;
             var isExponential = false;
-            var lastChar = ' ';
+            var lastChar = currentCharacter[0];
             var symbol = ScanSymbol(currentCharacter, c =>
             {
                 var result =
@@ -126,15 +126,24 @@ namespace PascalCompiler
             var isParsed = double.TryParse(symbol, NumberStyles.Float,
                 NumberFormatInfo.InvariantInfo, out var numericConstantValue);
 
+            if (!isParsed)
+                IoManager.InsertError(CurrentToken.CharacterNumber, 50);
+
             CurrentToken.NumericValue = numericConstantValue;
 
             CurrentToken.Symbol =
-                    gotDot
+                    gotDot || isExponential
                     ? Constants.Symbol.FloatConstant
                     : Constants.Symbol.IntegerConstant;
 
             if (CurrentToken.Symbol == Constants.Symbol.IntegerConstant && CurrentToken.NumericValue > Constants.MaximumIntegerValue)
                 IoManager.InsertError(CurrentToken.CharacterNumber, 203);
+
+            if (CurrentToken.Symbol == Constants.Symbol.FloatConstant && CurrentToken.NumericValue * Constants.MaximumFloatValue < 1)
+                IoManager.InsertError(CurrentToken.CharacterNumber, 206);
+
+            if (CurrentToken.Symbol == Constants.Symbol.FloatConstant && CurrentToken.NumericValue > Constants.MaximumFloatValue)
+                IoManager.InsertError(CurrentToken.CharacterNumber, 207);
         }
 
         private void ScanKeywordOrIdentifier(string currentCharacter)
@@ -142,7 +151,9 @@ namespace PascalCompiler
             var symbol = ScanSymbol(currentCharacter, c => char.IsLetterOrDigit(c) || c == '_');
 
             if (Constants.StringSymbolMap.ContainsKey(symbol.ToLower()))
+            {
                 CurrentToken.Symbol = Constants.StringSymbolMap[symbol.ToLower()];
+            }
             else
             {
                 CurrentToken.Symbol = Constants.Symbol.Identifier;
@@ -174,6 +185,9 @@ namespace PascalCompiler
                 CurrentToken.TextValue = textConstantBuilder.ToString();
                 if (textConstantBuilder.Length == 1) CurrentToken.Symbol = Constants.Symbol.CharConstant;
                 else if (textConstantBuilder.Length > 1) CurrentToken.Symbol = Constants.Symbol.StringConstant;
+
+                if (textConstantBuilder.Length > Constants.MaximumStringLength)
+                    IoManager.InsertError(CurrentToken.CharacterNumber, 76);
             }
             else
             {
