@@ -1,9 +1,13 @@
    1    program p;
-   2    const b=10;
-   3    var a:integer;
-   4    begin
-   5    a:=2;
-***1*** ^ cтрока: 5, символ: 1, код ошибки: 13
-******* должно идти слово  END
-***2*** ^ cтрока: 5, символ: 1, код ошибки: 61
-******* должен идти символ  '.'
+   2    const b=10; c=-10; b=+c;
+   3    type a=integer;
+   4    a=b;
+   5    r = record a:integer end;
+   6    var a,b,c:integer;
+   7    d:float;
+   8    begin
+   9    a:=a <> a*b/d+(123+a+b) or i;
+  10    with a do begin b := 5 end;
+  11    while a do begin if a <> 0 then b:= c else a :=2+2 end;
+  12    if a then b:=b else if a then b:=b else c:=c;
+  13    end.

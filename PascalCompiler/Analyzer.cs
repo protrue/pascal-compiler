@@ -93,22 +93,47 @@ namespace PascalCompiler
 
         private void AnalyzeNonLabledStatement()
         {
-
+            switch (CurrentSymbol)
+            {
+                case Symbol.Identifier:
+                case Symbol.Goto:
+                    AnalyzeSimpleStatement();
+                    break;
+                case Symbol.Begin:
+                case Symbol.For:
+                case Symbol.While:
+                case Symbol.Repeat:
+                case Symbol.If:
+                case Symbol.Case:
+                case Symbol.With:
+                    AnalyzeComplexStatement();
+                    break;
+            }
         }
 
         private void AnalyzeSimpleStatement()
         {
-
+            switch (CurrentSymbol)
+            {
+                case Symbol.Identifier:
+                    AnalyzeAssignStatement();
+                    break;
+                case Symbol.Goto:
+                    AnalyzeGotoStatement();
+                    break;
+            }
         }
 
         private void AnalyzeAssignStatement()
         {
-
+            AnalyzeVariable();
+            AcceptTerminal(Symbol.Assign);
+            AnalyzeExpression();
         }
 
         private void AnalyzeVariable()
         {
-
+            AcceptTerminal(Symbol.Identifier);
         }
 
         private void AnalyzeFullVariable()
@@ -195,17 +220,132 @@ namespace PascalCompiler
 
         private void AnalyzeComplexStatement()
         {
+            switch (CurrentSymbol)
+            {
+                case Symbol.Begin:
+                    AnalyzeCompoundStatement();
+                    break;
+                case Symbol.While:
+                    AnalyzeWhileStatement();
+                    break;
+                case Symbol.If:
+                    AnalyzeIfStatement();
+                    break;
+                case Symbol.Case:
+                    AnalyzeCaseStatement();
+                    break;
+                case Symbol.With:
+                    AnalyzeWithStatement();
+                    break;
+            }
+        }
 
+        private void AnalyzeCompoundStatement()
+        {
+            AcceptTerminal(Symbol.Begin);
+            AnalyzeStatement();
+            while (CurrentSymbol == Symbol.Semicolon)
+            {
+                AcceptTerminal(Symbol.Semicolon);
+                AnalyzeStatement();
+            }
+            AcceptTerminal(Symbol.End);
+        }
+
+        private void AnalyzeWithStatement()
+        {
+            AcceptTerminal(Symbol.With);
+            AnalyzeRecordVariablesList();
+            AcceptTerminal(Symbol.Do);
+            AnalyzeStatement();
+        }
+
+        private void AnalyzeRecordVariablesList()
+        {
+            AnalyzeRecordVariable();
+            while (CurrentSymbol == Symbol.Comma)
+            {
+                AcceptTerminal(Symbol.Comma);
+                AnalyzeRecordVariable();
+            }
+        }
+
+        private void AnalyzeCaseStatement()
+        {
+            AcceptTerminal(Symbol.Case);
+            AnalyzeExpression();
+            AcceptTerminal(Symbol.Of);
+            AnalyzeCaseElement();
+            AcceptTerminal(Symbol.End);
+        }
+
+        private void AnalyzeCaseElement()
+        {
+            AnalyzeConstant();
+            while (CurrentSymbol == Symbol.Comma)
+            {
+                AcceptTerminal(Symbol.Comma);
+                AnalyzeConstant();
+            }
+            AcceptTerminal(Symbol.Colon);
+            AnalyzeStatement();
         }
 
         private void AnalyzeExpression()
         {
+            Console.WriteLine($"Expression: {CurrentSymbol}");
+            switch (CurrentSymbol)
+            {
+                case Symbol.Plus:
+                case Symbol.Minus:
+                case Symbol.Identifier:
+                case Symbol.IntegerConstant:
+                case Symbol.FloatConstant:
+                case Symbol.CharConstant:
+                case Symbol.StringConstant:
+                case Symbol.LeftRoundBracket:
+                case Symbol.Not:
+                    AnalyzeSimpleExpression();
+                    break;
+                default:
+                    IoManager.InsertError(CurrentToken.CharacterNumber, 1004);
+                    break;
+            }
 
+            if (CurrentSymbol == Symbol.Equals
+            || CurrentSymbol == Symbol.Greater
+            || CurrentSymbol == Symbol.GreaterOrEqual
+            || CurrentSymbol == Symbol.NotEqual
+            || CurrentSymbol == Symbol.Less
+            || CurrentSymbol == Symbol.LessOrEqual
+            || CurrentSymbol == Symbol.In)
+            {
+                AnalyzeComparisonOperators();
+                AnalyzeSimpleExpression();
+            }
         }
 
         private void AnalyzeSimpleExpression()
         {
+            Console.WriteLine($"Simple expression: {CurrentSymbol}");
+            switch (CurrentSymbol)
+            {
+                case Symbol.Plus:
+                    AcceptTerminal(Symbol.Plus);
+                    break;
+                case Symbol.Minus:
+                    AcceptTerminal(Symbol.Minus);
+                    break;
+            }
 
+            AnalyzeAddend();
+            while (CurrentSymbol == Symbol.Plus
+                || CurrentSymbol == Symbol.Minus
+                || CurrentSymbol == Symbol.Or)
+            {
+                AnalyzeAdditiveOperators();
+                AnalyzeAddend();
+            }
         }
 
         private void AnalyzeComparisonOperators()
@@ -261,6 +401,7 @@ namespace PascalCompiler
 
         private void AnalyzeAddend()
         {
+            Console.WriteLine($"Addend: {CurrentSymbol}");
             AnalyzeMultiplicand();
             while (CurrentSymbol == Symbol.Asterisk
             || CurrentSymbol == Symbol.Slash
@@ -275,7 +416,53 @@ namespace PascalCompiler
 
         private void AnalyzeMultiplicand()
         {
+            Console.WriteLine($"Multiplicand: {CurrentSymbol}");
+            switch (CurrentSymbol)
+            {
+                // TODO: Check semantics here
+                case Symbol.IntegerConstant:
+                case Symbol.FloatConstant:
+                case Symbol.CharConstant:
+                case Symbol.StringConstant:
+                case Symbol.True:
+                case Symbol.False:
+                case Symbol.Identifier:
+                    GetNextToken();
+                    break;
+                case Symbol.Not:
+                    AcceptTerminal(Symbol.Not);
+                    AnalyzeMultiplicand();
+                    break;
+                case Symbol.LeftRoundBracket:
+                    AcceptTerminal(Symbol.LeftRoundBracket);
+                    AnalyzeExpression();
+                    AcceptTerminal(Symbol.RightRoundBracket);
+                    break;
+                default:
+                    IoManager.InsertError(CurrentToken.CharacterNumber, 1007);
+                    break;
+            }
+        }
 
+        private void AnalyzeIfStatement()
+        {
+            AcceptTerminal(Symbol.If);
+            AnalyzeExpression();
+            AcceptTerminal(Symbol.Then);
+            AnalyzeStatement();
+            if (CurrentSymbol == Symbol.Else)
+            {
+                AcceptTerminal(Symbol.Else);
+                AnalyzeStatement();
+            }
+        }
+
+        private void AnalyzeWhileStatement()
+        {
+            AcceptTerminal(Symbol.While);
+            AnalyzeExpression();
+            AcceptTerminal(Symbol.Do);
+            AnalyzeStatement();
         }
 
         private void AnalyzeFunctions()
@@ -297,6 +484,13 @@ namespace PascalCompiler
                 AcceptTerminal(Symbol.Equals);
                 AnalyzeConstant();
                 AcceptTerminal(Symbol.Semicolon);
+                while (CurrentSymbol == Symbol.Identifier)
+                {
+                    AcceptTerminal(Symbol.Identifier);
+                    AcceptTerminal(Symbol.Equals);
+                    AnalyzeConstant();
+                    AcceptTerminal(Symbol.Semicolon);
+                }
             }
         }
 
@@ -304,8 +498,12 @@ namespace PascalCompiler
         {
             if (CurrentSymbol == Symbol.Plus || CurrentSymbol == Symbol.Minus)
             {
+                GetNextToken();
                 switch (CurrentSymbol)
                 {
+                    case Symbol.Identifier:
+                        AcceptTerminal(Symbol.Identifier);
+                        break;
                     case Symbol.FloatConstant:
                         AcceptTerminal(Symbol.FloatConstant);
                         break;
@@ -313,7 +511,7 @@ namespace PascalCompiler
                         AcceptTerminal(Symbol.IntegerConstant);
                         break;
                     default:
-                        GetNextToken();
+                        //GetNextToken();
                         IoManager.InsertError(CurrentToken.CharacterNumber, 50);
                         break;
                 }
@@ -322,6 +520,9 @@ namespace PascalCompiler
             {
                 switch (CurrentSymbol)
                 {
+                    case Symbol.Identifier:
+                        AcceptTerminal(Symbol.Identifier);
+                        break;
                     case Symbol.FloatConstant:
                         AcceptTerminal(Symbol.FloatConstant);
                         break;
@@ -335,7 +536,7 @@ namespace PascalCompiler
                         AcceptTerminal(Symbol.StringConstant);
                         break;
                     default:
-                        GetNextToken();
+                        //GetNextToken();
                         IoManager.InsertError(CurrentToken.CharacterNumber, 83);
                         break;
                 }
@@ -349,6 +550,11 @@ namespace PascalCompiler
                 AcceptTerminal(Symbol.Var);
                 AnalyzeSameTypeVariables();
                 AcceptTerminal(Symbol.Semicolon);
+                while (CurrentSymbol == Symbol.Identifier)
+                {
+                    AnalyzeSameTypeVariables();
+                    AcceptTerminal(Symbol.Semicolon);
+                }
             }
         }
 
@@ -369,9 +575,17 @@ namespace PascalCompiler
             if (CurrentSymbol == Symbol.Type)
             {
                 AcceptTerminal(Symbol.Type);
+                AcceptTerminal(Symbol.Identifier);
                 AcceptTerminal(Symbol.Equals);
                 AnalyzeType();
                 AcceptTerminal(Symbol.Semicolon);
+                while (CurrentSymbol == Symbol.Identifier)
+                {
+                    AcceptTerminal(Symbol.Identifier);
+                    AcceptTerminal(Symbol.Equals);
+                    AnalyzeType();
+                    AcceptTerminal(Symbol.Semicolon);
+                }
             }
         }
 
@@ -400,7 +614,7 @@ namespace PascalCompiler
                     AnalyzeReferenceType();
                     break;
                 default:
-                    GetNextToken();
+                    //GetNextToken();
                     IoManager.InsertError(CurrentToken.CharacterNumber, 331);
                     break;
             }
@@ -425,7 +639,7 @@ namespace PascalCompiler
                     AnalyzeLimitedType();
                     break;
                 default:
-                    GetNextToken();
+                    //GetNextToken();
                     IoManager.InsertError(CurrentToken.CharacterNumber, 1);
                     break;
             }
