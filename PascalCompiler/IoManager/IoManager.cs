@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace PascalCompiler
+namespace PascalCompiler.IoManager
 {
     public class IoManager : IDisposable
     {
@@ -100,7 +100,7 @@ namespace PascalCompiler
         {
             CompilationErrors.Add(compilationError);
 
-            if (CompilationErrors.Count >= Constants.MaximumErrorsCount)
+            if (CompilationErrors.Count >= Constants.Constants.MaximumErrorsCount)
                 return;
 
             var offset = CreateIndent(compilationError.CharacterNumber);
@@ -115,7 +115,7 @@ namespace PascalCompiler
                 $"код ошибки: {compilationError.ErrorCode}");
             OutputStream.WriteLine(
                 $"{asteriskIndent} " +
-                $"{Constants.ErrorsMap[compilationError.ErrorCode]}");
+                $"{Constants.Constants.ErrorsMap[compilationError.ErrorCode]}");
         }
 
         public void Dispose()

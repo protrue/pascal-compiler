@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PascalCompiler
+namespace PascalCompiler.Constants
 {
     public static partial class Constants
     {
@@ -144,6 +144,9 @@ namespace PascalCompiler
             { 1005, @"Должно идти множимое"},
             { 1006, @"Должно идти слагаемое"},
             { 1007, @"Ошибка в выражении"},
+            { 1008, @"Должна идти константа"},
+            { 1009, @"Должен идти оператор"},
+            { 1010, @"Ошибка в выражении"},
         };
     }
 }

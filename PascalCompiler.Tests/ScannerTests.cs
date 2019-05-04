@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using FluentAssertions;
+using PascalCompiler.Tokenizer;
 
 namespace PascalCompiler.Tests
 {
@@ -34,9 +35,9 @@ namespace PascalCompiler.Tests
 while";
             File.WriteAllText(inputFileName, inputText);
 
-            var inputOutputModule = new IoManager(inputFileName, outputFileName);
+            var inputOutputModule = new IoManager.IoManager(inputFileName, outputFileName);
 
-            var scanner = new Tokenizer(inputOutputModule);
+            var scanner = new Tokenizer.Tokenizer(inputOutputModule);
             var tokens = new List<Token>();
 
             while (!scanner.IsEndOfTokens)

@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 
-namespace PascalCompiler
+namespace PascalCompiler.Tokenizer
 {
     public class Tokenizer : IDisposable
     {
-        public IoManager IoManager { get; set; }
+        public IoManager.IoManager IoManager { get; set; }
 
         public bool IsEndOfTokens => IoManager.IsEndOfFile && _storedCharacters.Count == 0;
 
@@ -20,7 +19,7 @@ namespace PascalCompiler
         private Queue<string> _storedCharacters;
         private Token _storedToken;
 
-        public Tokenizer(IoManager ioManager)
+        public Tokenizer(IoManager.IoManager ioManager)
         {
             IoManager = ioManager;
 
@@ -59,22 +58,22 @@ namespace PascalCompiler
 
         private void ScanTypographicalSymbol(string currentCharacter)
         {
-            if (!Constants.PrefixSymbols.Contains(currentCharacter))
-                CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
+            if (!Constants.Constants.PrefixSymbols.Contains(currentCharacter))
+                CurrentToken.Symbol = Constants.Constants.StringSymbolMap[currentCharacter];
             else if (IoManager.IsEndOfFile)
-                CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
+                CurrentToken.Symbol = Constants.Constants.StringSymbolMap[currentCharacter];
             else
             {
                 var nextCharacter = IoManager.GetNextCharacter().ToString();
                 var symbol = currentCharacter + nextCharacter;
 
-                if (Constants.StringSymbolMap.ContainsKey(symbol))
-                    CurrentToken.Symbol = Constants.StringSymbolMap[symbol];
+                if (Constants.Constants.StringSymbolMap.ContainsKey(symbol))
+                    CurrentToken.Symbol = Constants.Constants.StringSymbolMap[symbol];
                 else
                 {
                     _storedCharacters.Enqueue(nextCharacter);
                     _storedToken = GetTokenWithCurrentPosition();
-                    CurrentToken.Symbol = Constants.StringSymbolMap[currentCharacter];
+                    CurrentToken.Symbol = Constants.Constants.StringSymbolMap[currentCharacter];
                 }
             }
         }
@@ -133,16 +132,16 @@ namespace PascalCompiler
 
             CurrentToken.Symbol =
                     gotDot || isExponential
-                    ? Constants.Symbol.FloatConstant
-                    : Constants.Symbol.IntegerConstant;
+                    ? Constants.Constants.Symbol.FloatConstant
+                    : Constants.Constants.Symbol.IntegerConstant;
 
-            if (CurrentToken.Symbol == Constants.Symbol.IntegerConstant && CurrentToken.NumericValue > Constants.MaximumIntegerValue)
+            if (CurrentToken.Symbol == Constants.Constants.Symbol.IntegerConstant && CurrentToken.NumericValue > Constants.Constants.MaximumIntegerValue)
                 IoManager.InsertError(CurrentToken.CharacterNumber, 203);
 
-            if (CurrentToken.Symbol == Constants.Symbol.FloatConstant && CurrentToken.NumericValue * Constants.MaximumFloatValue < 1)
+            if (CurrentToken.Symbol == Constants.Constants.Symbol.FloatConstant && CurrentToken.NumericValue * Constants.Constants.MaximumFloatValue < 1)
                 IoManager.InsertError(CurrentToken.CharacterNumber, 206);
 
-            if (CurrentToken.Symbol == Constants.Symbol.FloatConstant && CurrentToken.NumericValue > Constants.MaximumFloatValue)
+            if (CurrentToken.Symbol == Constants.Constants.Symbol.FloatConstant && CurrentToken.NumericValue > Constants.Constants.MaximumFloatValue)
                 IoManager.InsertError(CurrentToken.CharacterNumber, 207);
         }
 
@@ -150,13 +149,13 @@ namespace PascalCompiler
         {
             var symbol = ScanSymbol(currentCharacter, c => char.IsLetterOrDigit(c) || c == '_');
 
-            if (Constants.StringSymbolMap.ContainsKey(symbol.ToLower()))
+            if (Constants.Constants.StringSymbolMap.ContainsKey(symbol.ToLower()))
             {
-                CurrentToken.Symbol = Constants.StringSymbolMap[symbol.ToLower()];
+                CurrentToken.Symbol = Constants.Constants.StringSymbolMap[symbol.ToLower()];
             }
             else
             {
-                CurrentToken.Symbol = Constants.Symbol.Identifier;
+                CurrentToken.Symbol = Constants.Constants.Symbol.Identifier;
                 CurrentToken.TextValue = symbol;
                 Names.Add(symbol);
             }
@@ -183,10 +182,10 @@ namespace PascalCompiler
             if (textConstantBuilder.Length > 0)
             {
                 CurrentToken.TextValue = textConstantBuilder.ToString();
-                if (textConstantBuilder.Length == 1) CurrentToken.Symbol = Constants.Symbol.CharConstant;
-                else if (textConstantBuilder.Length > 1) CurrentToken.Symbol = Constants.Symbol.StringConstant;
+                if (textConstantBuilder.Length == 1) CurrentToken.Symbol = Constants.Constants.Symbol.CharConstant;
+                else if (textConstantBuilder.Length > 1) CurrentToken.Symbol = Constants.Constants.Symbol.StringConstant;
 
-                if (textConstantBuilder.Length > Constants.MaximumStringLength)
+                if (textConstantBuilder.Length > Constants.Constants.MaximumStringLength)
                     IoManager.InsertError(CurrentToken.CharacterNumber, 76);
             }
             else
@@ -254,19 +253,19 @@ namespace PascalCompiler
                 ScanNumericConstant(currentCharacter);
             else if (char.IsLetter(currentCharacter, 0))
                 ScanKeywordOrIdentifier(currentCharacter);
-            else if (Constants.TypographicalSymbols.Contains(currentCharacter))
+            else if (Constants.Constants.TypographicalSymbols.Contains(currentCharacter))
             {
                 ScanTypographicalSymbol(currentCharacter);
 
                 switch (CurrentToken.Symbol)
                 {
-                    case Constants.Symbol.Comment:
+                    case Constants.Constants.Symbol.Comment:
                         SkipDoubleSlashComment();
                         return GetNextToken();
-                    case Constants.Symbol.LeftComment:
+                    case Constants.Constants.Symbol.LeftComment:
                         SkipAsteriskParenthesisComment();
                         return GetNextToken();
-                    case Constants.Symbol.LeftCurlyBracket:
+                    case Constants.Constants.Symbol.LeftCurlyBracket:
                         SkipCurlyBracketComment();
                         return GetNextToken();
                 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Configuration;
 using System.Linq;
+using PascalCompiler.Tokenizer;
 
 namespace PascalCompiler.Cli
 {
@@ -15,7 +16,7 @@ namespace PascalCompiler.Cli
         {
             var compiler = new Compiler(InputFilePath, OutputFilePath);
 
-            Console.WriteLine("IoManager test");
+            Console.WriteLine($"{Environment.NewLine}IoManager test");
 
             var letters = new List<char>();
             while (!compiler.IoManager.IsEndOfFile)
@@ -25,14 +26,14 @@ namespace PascalCompiler.Cli
 
             compiler.Dispose();
 
-            Console.WriteLine(string.Join("-", letters.Select(l => $"[{l}]")));
+            Console.WriteLine($"Letters:{Environment.NewLine}{string.Join("-", letters.Select(l => $"[{l}]"))}");
         }
 
         public static void TestTokenizer()
         {
             var compiler = new Compiler(InputFilePath, OutputFilePath);
 
-            Console.WriteLine("Tokenizer test");
+            Console.WriteLine($"{Environment.NewLine}Tokenizer test");
 
             var tokens = new List<Token>();
 
@@ -45,14 +46,14 @@ namespace PascalCompiler.Cli
 
             var tokensString = string.Join(Environment.NewLine, tokens);
             var namesString = string.Join(Environment.NewLine, compiler.Tokenizer.Names);
-            Console.WriteLine($"{tokensString}{Environment.NewLine}{namesString}");
+            Console.WriteLine(string.Join(Environment.NewLine, new[] { "Tokens:", tokensString, "Names:", namesString }));
         }
 
         public static void TestAnalyzer()
         {
             var compiler = new Compiler(InputFilePath, OutputFilePath);
 
-            Console.WriteLine("Analyzer test");
+            Console.WriteLine($"{Environment.NewLine}Analyzer test");
 
             compiler.Analyzer.Analyze();
 
@@ -63,9 +64,14 @@ namespace PascalCompiler.Cli
 
         public static void Main(string[] args)
         {
-            TestIoManager();
-            TestTokenizer();
-            TestAnalyzer();
+            while (true)
+            {
+                TestIoManager();
+                TestTokenizer();
+                TestAnalyzer();
+
+                Console.ReadKey();
+            }
         }
     }
 }

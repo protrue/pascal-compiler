@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PascalCompiler
+namespace PascalCompiler.Constants
 {
     public static partial class Constants
     {

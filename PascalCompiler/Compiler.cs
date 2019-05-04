@@ -7,28 +7,28 @@ namespace PascalCompiler
 {
     public class Compiler : IDisposable
     {
-        public IoManager IoManager { get; set; }
-        public Tokenizer Tokenizer { get; set; }
-        public Analyzer Analyzer { get; set; }
+        public IoManager.IoManager IoManager { get; set; }
+        public Tokenizer.Tokenizer Tokenizer { get; set; }
+        public Analyzer.Analyzer Analyzer { get; set; }
 
         private Compiler()
         {
-            Tokenizer = new Tokenizer(IoManager);
-            Analyzer = new Analyzer(IoManager, Tokenizer);
+            Tokenizer = new Tokenizer.Tokenizer(IoManager);
+            Analyzer = new Analyzer.Analyzer(IoManager, Tokenizer);
         }
 
         public Compiler(Stream inputStream, Stream outputStream)
         {
-            IoManager = new IoManager(inputStream, outputStream);
-            Tokenizer = new Tokenizer(IoManager);
-            Analyzer = new Analyzer(IoManager, Tokenizer);
+            IoManager = new IoManager.IoManager(inputStream, outputStream);
+            Tokenizer = new Tokenizer.Tokenizer(IoManager);
+            Analyzer = new Analyzer.Analyzer(IoManager, Tokenizer);
         }
 
         public Compiler(string inputPath, string outputPath)
         {
-            IoManager = new IoManager(inputPath, outputPath);
-            Tokenizer = new Tokenizer(IoManager);
-            Analyzer = new Analyzer(IoManager, Tokenizer);
+            IoManager = new IoManager.IoManager(inputPath, outputPath);
+            Tokenizer = new Tokenizer.Tokenizer(IoManager);
+            Analyzer = new Analyzer.Analyzer(IoManager, Tokenizer);
         }
 
         public void Dispose()

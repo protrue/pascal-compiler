@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace PascalCompiler
+namespace PascalCompiler.Constants
 {
     public static partial class Constants
     {
