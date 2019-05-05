@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using PascalCompiler.Tokenizer;
 using static PascalCompiler.Constants.Constants;
 
@@ -26,17 +27,20 @@ namespace PascalCompiler.Analyzer
         private List<Variable> _currentVariables;
         private Type _currentRecord;
 
+        private Token _storedToken;
+        private Token _previousToken;
+
         public Analyzer(IoManager.IoManager ioManager, Tokenizer.Tokenizer tokenizer)
         {
             IoManager = ioManager;
             Tokenizer = tokenizer;
             Scopes = new List<Scope>();
             var fictitiousScope = new Scope();
-            fictitiousScope.Types["integer"] = new Type() { Identifier = "integer", BaseType = BaseType.Scalar, ScalarType = ScalarType.Integer };
-            fictitiousScope.Types["real"] = new Type() { Identifier = "real", BaseType = BaseType.Scalar, ScalarType = ScalarType.Real };
-            fictitiousScope.Types["char"] = new Type() { Identifier = "char", BaseType = BaseType.Scalar, ScalarType = ScalarType.Char };
-            fictitiousScope.Types["string"] = new Type() { Identifier = "string", BaseType = BaseType.Scalar, ScalarType = ScalarType.String };
-            fictitiousScope.Types["boolean"] = new Type() { Identifier = "boolean", BaseType = BaseType.Scalar, ScalarType = ScalarType.Boolean };
+            fictitiousScope.Types.Add(new Type() { Identifier = "integer", BaseType = BaseType.Scalar, ScalarType = ScalarType.Integer });
+            fictitiousScope.Types.Add(new Type() { Identifier = "real", BaseType = BaseType.Scalar, ScalarType = ScalarType.Real });
+            fictitiousScope.Types.Add(new Type() { Identifier = "char", BaseType = BaseType.Scalar, ScalarType = ScalarType.Char });
+            fictitiousScope.Types.Add(new Type() { Identifier = "string", BaseType = BaseType.Scalar, ScalarType = ScalarType.String });
+            fictitiousScope.Types.Add(new Type() { Identifier = "boolean", BaseType = BaseType.Scalar, ScalarType = ScalarType.Boolean });
             Scopes.Add(fictitiousScope);
         }
 
@@ -45,8 +49,22 @@ namespace PascalCompiler.Analyzer
             IoManager.InsertError(CurrentToken?.CharacterNumber ?? IoManager.CurrentCharacterNumber, errorCode);
         }
 
+        private void StepBack()
+        {
+            _storedToken = CurrentToken;
+            CurrentToken = _previousToken;
+        }
+
         private void GetNextToken()
         {
+            _previousToken = CurrentToken;
+
+            if (_storedToken != null)
+            {
+                CurrentToken = _storedToken;
+                return;
+            }
+            
             CurrentToken = Tokenizer.GetNextToken();
         }
 
@@ -109,9 +127,10 @@ namespace PascalCompiler.Analyzer
         {
             foreach (var scope in Scopes)
             {
-                if (scope.Types.ContainsKey(identifier))
+                var type = scope.Types.FirstOrDefault(t => t.Identifier == identifier);
+                if (type != null)
                 {
-                    return scope.Types[identifier];
+                    return type;
                 }
             }
 
@@ -122,9 +141,10 @@ namespace PascalCompiler.Analyzer
         {
             foreach (var scope in Scopes)
             {
-                if (scope.Variables.ContainsKey(identifier))
+                var variable = scope.Variables.FirstOrDefault(v => v.Identifier == identifier);
+                if (variable != null)
                 {
-                    return scope.Variables[identifier];
+                    return variable;
                 }
             }
 
@@ -135,9 +155,24 @@ namespace PascalCompiler.Analyzer
         {
             foreach (var scope in Scopes)
             {
-                if (scope.Constants.ContainsKey(identifier))
+                var constant = scope.Constants.FirstOrDefault(c => c.Identifier == identifier);
+                if (constant != null)
                 {
-                    return scope.Constants[identifier];
+                    return constant;
+                }
+            }
+
+            return null;
+        }
+
+        private Entity Search(string identifier)
+        {
+            foreach (var scope in Scopes)
+            {
+                var entity = scope.Entities.FirstOrDefault(e => e.Identifier == identifier);
+                if (entity != null)
+                {
+                    return entity;
                 }
             }
 

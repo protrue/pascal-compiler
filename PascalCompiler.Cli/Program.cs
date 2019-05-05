@@ -57,6 +57,14 @@ namespace PascalCompiler.Cli
 
             compiler.Analyzer.Analyze();
 
+            foreach (var scope in compiler.Analyzer.Scopes)
+            {
+                foreach (var scopeIdentifierClass in scope.Entities)
+                {
+                    Console.WriteLine($"{scopeIdentifierClass.Identifier} {scopeIdentifierClass.IdentifierClass}");
+                }
+            }
+            
             compiler.Dispose();
 
             Console.WriteLine(File.ReadAllText(OutputFilePath));

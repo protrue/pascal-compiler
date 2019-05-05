@@ -5,19 +5,19 @@ namespace PascalCompiler.Analyzer
 {
     public class Scope
     {
-        public Dictionary<string, IdentifierClass> IdentifierClasses { get; set; }
-        public Dictionary<string, Constant> Constants { get; set; }
-        public Dictionary<string, Type> Types { get; set; }
-        public Dictionary<string, Variable> Variables { get; set; }
+        public List<Entity> Entities { get; set; }
+        public List< Constant> Constants { get; set; }
+        public List< Type> Types { get; set; }
+        public List< Variable> Variables { get; set; }
 
         public Scope OuterScope { get; set; }
 
         public Scope()
         {
-            IdentifierClasses = new Dictionary<string, IdentifierClass>();
-            Constants = new Dictionary<string, Constant>();
-            Types = new Dictionary<string, Type>();
-            Variables = new Dictionary<string, Variable>();
+            Entities = new List<Entity>();
+            Constants = new List<Constant>();
+            Types = new List<Type>();
+            Variables = new List<Variable>();
         }
     }
 }

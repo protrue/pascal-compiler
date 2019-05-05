@@ -83,9 +83,60 @@ namespace PascalCompiler.Analyzer
 
             if (!Belongs(Starters.Statement)) return;
 
-            AnalyzeVariable();
+            var leftType = AnalyzeVariable();
             AcceptTerminal(Symbol.Assign);
-            AnalyzeExpression(Union(Followers.Expression, followers));
+            var rightType = AnalyzeExpression(Union(Followers.Expression, followers));
+
+            switch (rightType)
+            {
+                case ScalarType.Unknown:
+                    break;
+                case ScalarType.Integer:
+                    if (leftType.ScalarType != ScalarType.Integer || leftType.ScalarType != ScalarType.Real)
+                    {
+                        if (_previousToken != null)
+                            IoManager.InsertError(_previousToken.CharacterNumber, 145);
+                        else
+                            InsertError(145);
+                    }
+                    break;
+                case ScalarType.Real:
+                    if (leftType.ScalarType != ScalarType.Integer || leftType.ScalarType != ScalarType.Real)
+                    {
+                        if (_previousToken != null)
+                            IoManager.InsertError(_previousToken.CharacterNumber, 145);
+                        else
+                            InsertError(145);
+                    }
+                    break;
+                case ScalarType.Char:
+                    if (leftType.ScalarType != ScalarType.Char)
+                    {
+                        if (_previousToken != null)
+                            IoManager.InsertError(_previousToken.CharacterNumber, 145);
+                        else
+                            InsertError(145);
+                    }
+                    break;
+                case ScalarType.String:
+                    if (leftType.ScalarType != ScalarType.String)
+                    {
+                        if (_previousToken != null)
+                            IoManager.InsertError(_previousToken.CharacterNumber, 145);
+                        else
+                            InsertError(145);
+                    }
+                    break;
+                case ScalarType.Boolean:
+                    if (leftType.ScalarType != ScalarType.Boolean)
+                    {
+                        if (_previousToken != null)
+                            IoManager.InsertError(_previousToken.CharacterNumber, 145);
+                        else
+                            InsertError(145);
+                    }
+                    break;
+            }
 
             if (!Belongs(followers))
             {
@@ -155,11 +206,19 @@ namespace PascalCompiler.Analyzer
 
             if (!Belongs(Starters.RecordVariablesList)) return;
 
-            AnalyzeVariable();
+            var type = AnalyzeVariable();
+            if (type.BaseType != BaseType.Record)
+            {
+                InsertError(140);
+            }
             while (CurrentSymbol == Symbol.Comma)
             {
                 AcceptTerminal(Symbol.Comma);
-                AnalyzeVariable();
+                type = AnalyzeVariable();
+                if (type.BaseType != BaseType.Record)
+                {
+                    InsertError(140);
+                }
             }
 
             if (!Belongs(followers))
@@ -223,7 +282,11 @@ namespace PascalCompiler.Analyzer
             if (!Belongs(Starters.IfStatement)) return;
 
             AcceptTerminal(Symbol.If);
-            AnalyzeExpression(Union(Followers.Expression, followers, Followers.IfStatementExpression));
+            var type = AnalyzeExpression(Union(Followers.Expression, followers, Followers.IfStatementExpression));
+            if (type != ScalarType.Boolean)
+            {
+                InsertError(135);
+            }
             AcceptTerminal(Symbol.Then);
             AnalyzeStatement(Union(followers, Followers.IfStatementTrueBlock));
             if (CurrentSymbol == Symbol.Else)
@@ -248,7 +311,11 @@ namespace PascalCompiler.Analyzer
             if (!Belongs(Starters.WhileStatement)) return;
 
             AcceptTerminal(Symbol.While);
-            AnalyzeExpression(Union(Followers.Expression, followers, Followers.WhileStatementExpression));
+            var type = AnalyzeExpression(Union(Followers.Expression, followers, Followers.WhileStatementExpression));
+            if (type != ScalarType.Boolean)
+            {
+                InsertError(135);
+            }
             AcceptTerminal(Symbol.Do);
             AnalyzeStatement(followers);
         }

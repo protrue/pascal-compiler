@@ -29,7 +29,7 @@ namespace PascalCompiler.Analyzer
             AcceptTerminal(Symbol.Identifier);
             if (AcceptedToken != null)
             {
-                CurrentScope.IdentifierClasses[AcceptedToken.TextValue] = IdentifierClass.Program;
+                CurrentScope.Entities.Add(new Entity(){Identifier =AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Program});
             }
             if (CurrentSymbol == Symbol.LeftRoundBracket)
             {
@@ -102,16 +102,15 @@ namespace PascalCompiler.Analyzer
             var constant = new Constant();
 
             AcceptTerminal(Symbol.Identifier);
-            if (AcceptedToken != null && SearchConstant(AcceptedToken.TextValue) != null)
+            if (AcceptedToken != null && Search(AcceptedToken.TextValue) != null)
             {
                 IoManager.InsertError(AcceptedToken.CharacterNumber, 101);
-                AcceptedToken = null;
             }
             if (AcceptedToken != null)
             {
-                CurrentScope.IdentifierClasses[AcceptedToken.TextValue] = IdentifierClass.Constant;
+                CurrentScope.Entities.Add(new Entity(){ Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Constant});
                 constant.Identifier = AcceptedToken.TextValue;
-                CurrentScope.Constants[AcceptedToken.TextValue] = constant;
+                CurrentScope.Constants.Add(constant);
             }
             AcceptTerminal(Symbol.Equals);
             AnalyzeConstant(Union(Followers.Constant, followers));
@@ -222,16 +221,15 @@ namespace PascalCompiler.Analyzer
             do
             {
                 AcceptTerminal(Symbol.Identifier);
-                if (AcceptedToken != null && SearchType(AcceptedToken.TextValue) != null)
+                if (AcceptedToken != null && Search(AcceptedToken.TextValue) != null)
                 {
                     IoManager.InsertError(AcceptedToken.CharacterNumber, 101);
-                    AcceptedToken = null;
                 }
                 if (AcceptedToken != null)
                 {
-                    CurrentScope.IdentifierClasses[AcceptedToken.TextValue] = IdentifierClass.Type;
+                    CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Type });
                     type.Identifier = AcceptedToken.TextValue;
-                    CurrentScope.Types[AcceptedToken.TextValue] = type;
+                    CurrentScope.Types.Add(type);
                 }
                 AcceptTerminal(Symbol.Equals);
                 AnalyzeType(Union(Followers.Type, followers));
@@ -285,11 +283,10 @@ namespace PascalCompiler.Analyzer
             _currentVariables = new List<Variable>();
             var variables = new List<Variable>();
             AcceptTerminal(Symbol.Identifier);
-            if (AcceptedToken != null && SearchVariable(AcceptedToken.TextValue) != null)
+            if (AcceptedToken != null && Search(AcceptedToken.TextValue) != null)
             {
-                CurrentScope.IdentifierClasses[AcceptedToken.TextValue] = IdentifierClass.Variable;
+                CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Variable });
                 IoManager.InsertError(AcceptedToken.CharacterNumber, 101);
-                AcceptedToken = null;
             }
             if (AcceptedToken != null)
             {
@@ -299,11 +296,10 @@ namespace PascalCompiler.Analyzer
             {
                 AcceptTerminal(Symbol.Comma);
                 AcceptTerminal(Symbol.Identifier);
-                if (AcceptedToken != null && SearchVariable(AcceptedToken.TextValue) != null)
+                if (AcceptedToken != null && Search(AcceptedToken.TextValue) != null)
                 {
-                    CurrentScope.IdentifierClasses[AcceptedToken.TextValue] = IdentifierClass.Variable;
+                    CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Variable });
                     IoManager.InsertError(AcceptedToken.CharacterNumber, 101);
-                    AcceptedToken = null;
                 }
                 if (AcceptedToken != null)
                 {
@@ -315,7 +311,7 @@ namespace PascalCompiler.Analyzer
             foreach (var variable in variables)
             {
                 variable.Type = _currentType;
-                CurrentScope.Variables[variable.Identifier] = variable;
+                CurrentScope.Variables.Add(variable);
             }
             
             if (!Belongs(followers))
