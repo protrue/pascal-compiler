@@ -103,7 +103,7 @@ namespace PascalCompiler.Analyzer
                 {
                     case Symbol.Plus:
                     case Symbol.Minus:
-                        var acceptedTypes = new[] {ScalarType.Integer, ScalarType.Real};
+                        var acceptedTypes = new[] { ScalarType.Integer, ScalarType.Real };
                         if (!acceptedTypes.Contains(resultType) || !acceptedTypes.Contains(secondType))
                         {
                             InsertError(211);
@@ -378,8 +378,12 @@ namespace PascalCompiler.Analyzer
                                 var variableType = AnalyzeVariable();
                                 type = variableType.ScalarType ?? ScalarType.Unknown;
                                 break;
+                            default:
+                                InsertError(144);
+                                break;
                         }
                     }
+                    else InsertError(104);
 
                     break;
                 case Symbol.Not:

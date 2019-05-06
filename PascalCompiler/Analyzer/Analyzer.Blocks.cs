@@ -29,7 +29,7 @@ namespace PascalCompiler.Analyzer
             AcceptTerminal(Symbol.Identifier);
             if (AcceptedToken != null)
             {
-                CurrentScope.Entities.Add(new Entity(){Identifier =AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Program});
+                CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Program });
             }
             if (CurrentSymbol == Symbol.LeftRoundBracket)
             {
@@ -108,7 +108,7 @@ namespace PascalCompiler.Analyzer
             }
             if (AcceptedToken != null)
             {
-                CurrentScope.Entities.Add(new Entity(){ Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Constant});
+                CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Constant });
                 constant.Identifier = AcceptedToken.TextValue;
                 CurrentScope.Constants.Add(constant);
             }
@@ -215,11 +215,11 @@ namespace PascalCompiler.Analyzer
 
             if (!Belongs(Starters.TypesBlock)) return;
 
-            _currentType = new Type();
-            var type = new Type();
             AcceptTerminal(Symbol.Type);
             do
             {
+                _currentType = new Type();
+                var type = new Type();
                 AcceptTerminal(Symbol.Identifier);
                 if (AcceptedToken != null && Search(AcceptedToken.TextValue) != null)
                 {
@@ -285,12 +285,13 @@ namespace PascalCompiler.Analyzer
             AcceptTerminal(Symbol.Identifier);
             if (AcceptedToken != null && Search(AcceptedToken.TextValue) != null)
             {
-                CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Variable });
+
                 IoManager.InsertError(AcceptedToken.CharacterNumber, 101);
             }
             if (AcceptedToken != null)
             {
-                variables.Add(new Variable(){Identifier = AcceptedToken.TextValue });
+                CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Variable });
+                variables.Add(new Variable() { Identifier = AcceptedToken.TextValue });
             }
             while (CurrentSymbol == Symbol.Comma)
             {
@@ -298,11 +299,11 @@ namespace PascalCompiler.Analyzer
                 AcceptTerminal(Symbol.Identifier);
                 if (AcceptedToken != null && Search(AcceptedToken.TextValue) != null)
                 {
-                    CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Variable });
                     IoManager.InsertError(AcceptedToken.CharacterNumber, 101);
                 }
                 if (AcceptedToken != null)
                 {
+                    CurrentScope.Entities.Add(new Entity() { Identifier = AcceptedToken.TextValue, IdentifierClass = IdentifierClass.Variable });
                     variables.Add(new Variable() { Identifier = AcceptedToken.TextValue });
                 }
             }
@@ -313,7 +314,7 @@ namespace PascalCompiler.Analyzer
                 variable.Type = _currentType;
                 CurrentScope.Variables.Add(variable);
             }
-            
+
             if (!Belongs(followers))
             {
                 InsertError(21);
