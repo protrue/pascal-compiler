@@ -1,17 +1,29 @@
-program p;
+program 1p;
 const b=10; c=-10; d=+c;
-type a=integer;
+type a=integer1;
 t=a;
-r = record a:integer end;
-var u,i,o:integer;
+r = record
+  a:integer;
+end;
+r1 = record
+    r2: r;
+    r3: r;
+    r2: integer;
+    r5: boolean;
+end;
+var u,i,o,u:integer;
 k:real;
+k2: r1;
 begin
-u:=b <> c*b/d+(123+a+b) or i;
+k := k2.r2.a;
+;;;;;;;;;;;;;;;;
+k2.r2.a = 9;
+(*u:=b <> c*b/d+(123+a+b) or i;
 with a do begin b := 5 end;
 while a do begin if a <> 0 then b:= c else a :=2+2 end;
 if a then b:=b else if a then b:=b else c:=c;
 case NUM of
 0,2,3,4,a,'123':b:=b;
 1:b:=b
-end
+end*)
 end.

@@ -45,6 +45,9 @@ namespace PascalCompiler.Analyzer
 
             switch (CurrentSymbol)
             {
+                case Symbol.Semicolon:
+                    AcceptTerminal(Symbol.Semicolon);
+                    break;
                 case Symbol.Identifier:
                 case Symbol.Goto:
                     AnalyzeSimpleStatement(followers);
@@ -92,7 +95,7 @@ namespace PascalCompiler.Analyzer
                 case ScalarType.Unknown:
                     break;
                 case ScalarType.Integer:
-                    if (leftType.ScalarType != ScalarType.Integer || leftType.ScalarType != ScalarType.Real)
+                    if (leftType.ScalarType != ScalarType.Integer && leftType.ScalarType != ScalarType.Real)
                     {
                         if (_previousToken != null)
                             IoManager.InsertError(_previousToken.CharacterNumber, 145);
@@ -101,7 +104,7 @@ namespace PascalCompiler.Analyzer
                     }
                     break;
                 case ScalarType.Real:
-                    if (leftType.ScalarType != ScalarType.Integer || leftType.ScalarType != ScalarType.Real)
+                    if (leftType.ScalarType != ScalarType.Integer && leftType.ScalarType != ScalarType.Real)
                     {
                         if (_previousToken != null)
                             IoManager.InsertError(_previousToken.CharacterNumber, 145);

@@ -163,6 +163,8 @@ namespace PascalCompiler.Constants
                 Symbol.If,
                 Symbol.Case,
                 Symbol.With,
+                Symbol.Semicolon,
+                Symbol.End
             };
 
             public static readonly HashSet<Symbol> NonLabeledStatement = new HashSet<Symbol>
@@ -176,6 +178,8 @@ namespace PascalCompiler.Constants
                 Symbol.If,
                 Symbol.Case,
                 Symbol.With,
+                Symbol.Semicolon,
+                Symbol.End,
             };
 
             public static readonly HashSet<Symbol> SimpleStatement = new HashSet<Symbol>
